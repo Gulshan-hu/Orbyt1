@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;500;700&family=Proza+Libre:wght@400;500;700&display=swap');
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@theme inline {
+  --font-unbounded: 'Unbounded', sans-serif;
+  --font-proza: 'Proza Libre', sans-serif;
+  --color-background: #000000;
+  --color-foreground: #FFFFFF;
+  --color-surface: #1A1A1A;
+  --color-surface-2: #111111;
+  --color-border-subtle: #2A2A2A;
+  --color-text-muted: #A1A1A1;
+  --color-accent: #E2E2E2;
+  --color-danger: #FF6B6B;
+  --radius-card: 16px;
+  --radius-pill: 999px;
+}
+
+:root {
+  --background: #000000;
+  --foreground: #FFFFFF;
+  --border: #2A2A2A;
+}
+
+* { border-color: #2A2A2A; }
+html, body { background: #000000; color: #FFFFFF; font-family: 'Proza Libre', sans-serif; }
+body, p, span, a, button, input, textarea, select, label, li, div { font-family: 'Proza Libre', sans-serif; }
+h1, h2, h3, h4, h5, h6 { font-family: 'Unbounded', sans-serif; }
+.font-unbounded, [class*="font-[Unbounded"] { font-family: 'Unbounded', sans-serif !important; }
+.font-proza, [class*="font-[Proza"] { font-family: 'Proza Libre', sans-serif !important; }
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { scrollbar-width: none; }
+
+.thin-scroll::-webkit-scrollbar { width: 4px; }
+.thin-scroll::-webkit-scrollbar-track { background: #2A2A2A; }
+.thin-scroll::-webkit-scrollbar-thumb { background: #E2E2E2; border-radius: 999px; }
+
+@keyframes marquee-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes marquee-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.animate-marquee-left { animation: marquee-left 30s linear infinite; }
+.animate-marquee-right { animation: marquee-right 35s linear infinite; }
+
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+.shimmer { background: linear-gradient(90deg, #1A1A1A 0%, #252525 50%, #1A1A1A 100%); background-size: 200% 100%; animation: shimmer 1.5s infinite; }
+
+input[type="range"].orbyt-slider { -webkit-appearance: none; appearance: none; height: 4px; background: #2A2A2A; border-radius: 999px; outline: none; }
+input[type="range"].orbyt-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #FFFFFF; border-radius: 50%; cursor: pointer; }
+input[type="range"].orbyt-slider::-moz-range-thumb { width: 16px; height: 16px; background: #FFFFFF; border-radius: 50%; cursor: pointer; border: none; }
