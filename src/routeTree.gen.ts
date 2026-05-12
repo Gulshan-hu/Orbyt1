@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as ShowcaseRouteImport } from './routes/showcase'
 import { Route as RatingsRouteImport } from './routes/ratings'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
@@ -22,6 +23,11 @@ import { Route as ProfileUserIdRouteImport } from './routes/profile/$userId'
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShowcaseRoute = ShowcaseRouteImport.update({
+  id: '/showcase',
+  path: '/showcase',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RatingsRoute = RatingsRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
+  '/showcase': typeof ShowcaseRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
   '/profile/me': typeof ProfileMeRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
+  '/showcase': typeof ShowcaseRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
   '/profile/me': typeof ProfileMeRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
+  '/showcase': typeof ShowcaseRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
   '/profile/me': typeof ProfileMeRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/ratings'
+    | '/showcase'
     | '/signup'
     | '/profile/$userId'
     | '/profile/me'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/ratings'
+    | '/showcase'
     | '/signup'
     | '/profile/$userId'
     | '/profile/me'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/ratings'
+    | '/showcase'
     | '/signup'
     | '/profile/$userId'
     | '/profile/me'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   RatingsRoute: typeof RatingsRoute
+  ShowcaseRoute: typeof ShowcaseRoute
   SignupRoute: typeof SignupRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
   ProfileMeRoute: typeof ProfileMeRoute
@@ -154,6 +167,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/showcase': {
+      id: '/showcase'
+      path: '/showcase'
+      fullPath: '/showcase'
+      preLoaderRoute: typeof ShowcaseRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ratings': {
@@ -222,6 +242,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   RatingsRoute: RatingsRoute,
+  ShowcaseRoute: ShowcaseRoute,
   SignupRoute: SignupRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,
   ProfileMeRoute: ProfileMeRoute,

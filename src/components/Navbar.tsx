@@ -29,6 +29,7 @@ export function Navbar() {
           {user ? (
             <>
               <Link to="/dashboard" className="text-[#A1A1A1] hover:text-white text-[14px] font-[Proza_Libre] transition">Dashboard</Link>
+              <Link to="/showcase" className="text-[#A1A1A1] hover:text-white text-[14px] font-[Proza_Libre] transition">Showcase</Link>
               <Link to="/profile/$userId" params={{ userId: user.id }}>
                 <Avatar name={fullName} size={36} />
               </Link>
@@ -54,6 +55,7 @@ export function Navbar() {
             {user ? (
               <>
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="text-white">Dashboard</Link>
+                <Link to="/showcase" onClick={() => setOpen(false)} className="text-white">Showcase</Link>
                 <Link to="/profile/$userId" params={{ userId: user.id }} onClick={() => setOpen(false)} className="text-white">Profile</Link>
                 <Link to="/connections" onClick={() => setOpen(false)} className="text-white">Connections</Link>
                 <button onClick={handleLogout} className="text-left text-[#FF6B6B]">Log Out</button>

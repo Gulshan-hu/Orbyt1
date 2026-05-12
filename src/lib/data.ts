@@ -22,6 +22,7 @@ export interface OrbytProject {
   name: string;
   description: string;
   projectLink?: string;
+  status: 'looking_for_team' | 'in_progress' | 'done';
   createdAt: string;
   skillsHave: string[];
   skillsNeed: { skill: string; note?: string }[];
@@ -35,6 +36,28 @@ export interface OrbytRating {
   toUserId: string;
   projectId: string;
   overallScore: number;
+  communication: number;
+  timeliness: number;
+  technicalSkill: number;
+  teamwork: number;
+  comment: string;
+  createdAt: string;
+}
+
+export interface OrbytProjectReview {
+  id: string;
+  projectId: string;
+  reviewerId: string;
+  reviewerName: string;
+  reviewText: string;
+  createdAt: string;
+}
+
+export interface OrbytTeammateReview {
+  id: string;
+  projectId: string;
+  fromUserId: string;
+  toUserId: string;
   communication: number;
   timeliness: number;
   technicalSkill: number;
@@ -125,6 +148,7 @@ function rowToProject(row: any, have: string[], need: { skill: string; note?: st
     name: row.name,
     description: row.description,
     projectLink: row.project_link ?? undefined,
+    status: row.status || 'looking_for_team',
     createdAt: relativeTime(row.created_at),
     skillsHave: have,
     skillsNeed: need,
@@ -392,6 +416,69 @@ export async function submitRating(args: {
     comment: args.comment,
   });
   if (error) throw error;
+}
+
+export async function updateProjectStatus(projectId: string, status: 'looking_for_team' | 'in_progress' | 'done') {
+  const { error } = await supabase.from("projects").update({ status }).eq("id", projectId);
+  if (error) throw error;
+}
+
+export async function submitProjectReview(projectId: string, reviewerId: string, reviewText: string) {
+  const { error } = await supabase.from("project_reviews").insert({
+    project_id: projectId,
+    reviewer_id: reviewerId,
+    review_text: reviewText,
+  });
+  if (error) throw error;
+}
+
+export async function submitTeammateReview(args: {
+  projectId: string;
+  fromUserId: string;
+  toUserId: string;
+  communication: number;
+  timeliness: number;
+  technicalSkill: number;
+  teamwork: number;
+  comment: string;
+}) {
+  const { error } = await supabase.from("teammate_reviews").insert({
+    project_id: args.projectId,
+    from_user_id: args.fromUserId,
+    to_user_id: args.toUserId,
+    communication: args.communication,
+    timeliness: args.timeliness,
+    technical_skill: args.technicalSkill,
+    teamwork: args.teamwork,
+    comment: args.comment,
+  });
+  if (error) throw error;
+}
+
+export async function fetchProjectReviews(projectId: string): Promise<OrbytProjectReview[]> {
+  const { data } = await supabase
+    .from("project_reviews")
+    .select("*, users!reviewer_id(first_name, last_name)")
+    .eq("project_id", projectId)
+    .order("created_at", { ascending: false });
+
+  return (data ?? []).map((r: any) => ({
+    id: r.id,
+    projectId: r.project_id,
+    reviewerId: r.reviewer_id,
+    reviewerName: `${r.users.first_name} ${r.users.last_name}`,
+    reviewText: r.review_text,
+    createdAt: relativeTime(r.created_at),
+  }));
+}
+
+export async function fetchCompletedProjects(): Promise<OrbytProject[]> {
+  const [{ data: rows }, members, ps] = await Promise.all([
+    supabase.from("projects").select("*").eq("status", "done").order("created_at", { ascending: false }),
+    loadProjectMembers(),
+    loadProjectSkills(),
+  ]);
+  return (rows ?? []).map(r => rowToProject(r, ps.have.get(r.id) ?? [], ps.need.get(r.id) ?? [], members.byProject.get(r.id) ?? []));
 }
 
 // ---------- Matching ----------
