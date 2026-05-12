@@ -11,16 +11,40 @@ export const SKILL_CATEGORIES: Record<string, string[]> = {
 
 export const UNIVERSITIES = [
   "Qarabağ Universiteti",
-  "ADA University",
-  "UNEC",
-  "Bakı Dövlət Universiteti",
-  "ADPU",
-  "Xəzər Universiteti",
-  "Bakı Mühəndislik Universiteti",
-  "Digər",
 ];
 
-export const MAJORS = ["Computer Science","Software Engineering","Business Information Systems","Mathematics","Design","Marketing","Economics","Law","Medicine","Other"];
+export const MAJORS = [
+  "Computer Science",
+  "Software Engineering",
+  "Information Technology",
+  "Data Science",
+  "Artificial Intelligence",
+  "Cybersecurity",
+  "Computer Engineering",
+  "Business Information Systems",
+  "Mathematics",
+  "Statistics",
+  "Physics",
+  "Design",
+  "Graphic Design",
+  "UI/UX Design",
+  "Marketing",
+  "Business Administration",
+  "Economics",
+  "Finance",
+  "Accounting",
+  "Management",
+  "Law",
+  "Medicine",
+  "Engineering",
+  "Mechanical Engineering",
+  "Electrical Engineering",
+  "Civil Engineering",
+  "Architecture",
+  "Psychology",
+  "Education",
+  "Other",
+];
 
 export function relativeTime(iso: string): string {
   const t = new Date(iso).getTime();

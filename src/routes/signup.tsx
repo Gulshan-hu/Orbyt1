@@ -8,7 +8,7 @@ import { Tag } from "@/components/Tag";
 import { Logo } from "@/components/Logo";
 import { OtpInput } from "@/components/OtpInput";
 import { SKILL_CATEGORIES, UNIVERSITIES, MAJORS } from "@/lib/constants";
-import { sendSignupOtp, verifySignupOtp } from "@/lib/auth";
+import { sendSignupOtp, verifySignupOtp, signInWithGoogle } from "@/lib/auth";
 import { setUserSkills, createProjectWithSkills } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/Toast";
@@ -189,6 +189,13 @@ function Signup() {
     navigate({ to: "/dashboard" });
   };
 
+  const handleGoogleSignIn = async () => {
+    const { error } = await signInWithGoogle();
+    if (error) {
+      show(error.message || "Failed to sign in with Google");
+    }
+  };
+
   return (
     <div className="bg-black min-h-screen text-white">
       <Navbar />
@@ -204,12 +211,28 @@ function Signup() {
               {step === 1 && (
                 <>
                   <h2 className="text-white text-[26px] mb-2">Hello! Let's get acquainted.</h2>
-                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">A few questions — then everything is ready.</p>
+                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">Sign up to get started.</p>
+                  <div className="flex flex-col gap-4 mb-6">
+                    <Button onClick={handleGoogleSignIn} full variant="ghost" className="flex items-center justify-center gap-3">
+                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
+                        <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
+                        <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+                        <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+                      </svg>
+                      Continue with Google
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="flex-1 h-px bg-[#2A2A2A]" />
+                    <span className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">or</span>
+                    <div className="flex-1 h-px bg-[#2A2A2A]" />
+                  </div>
                   <div className="flex flex-col gap-5">
                     <div><FieldLabel>First name</FieldLabel><Input placeholder="Alex" value={data.firstName} onChange={e => update("firstName", e.target.value)} /></div>
                     <div><FieldLabel>Last name</FieldLabel><Input placeholder="Johnson" value={data.lastName} onChange={e => update("lastName", e.target.value)} /></div>
                     <div>
-                      <FieldLabel>Gmail</FieldLabel>
+                      <FieldLabel>Email</FieldLabel>
                       <Input type="email" placeholder="alex@gmail.com" value={data.email} onChange={e => update("email", e.target.value)} />
                       <p className="text-[12px] text-[#A1A1A1] mt-1.5 font-[Proza_Libre]">We'll send a verification code. Tip: Use aliases like yourmail+test1@gmail.com for testing</p>
                     </div>
@@ -242,9 +265,9 @@ function Signup() {
                 <div className="text-center">
                   <h2 className="text-white text-[26px] mb-2">Check your inbox</h2>
                   <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">
-                    We sent an 8-digit code to <span className="text-white">{data.email}</span>
+                    We sent a 6-digit code to <span className="text-white">{data.email}</span>
                   </p>
-                  <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(""); }} length={8} />
+                  <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(""); }} length={6} />
                   {otpError && <p className="text-[#FF6B6B] text-[13px] font-[Proza_Libre] mt-3">{otpError}</p>}
                   <div className="mt-5">
                     <Button
@@ -257,7 +280,7 @@ function Signup() {
                   </div>
                   <StepFooter
                     onBack={() => setStep(1)}
-                    right={<Button disabled={otp.length !== 8} onClick={verifyAndContinue}>Verify</Button>}
+                    right={<Button disabled={otp.length !== 6} onClick={verifyAndContinue}>Verify</Button>}
                   />
                 </div>
               )}
