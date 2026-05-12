@@ -6,6 +6,20 @@ import { Button } from "./Button";
 import { ConnectModal } from "./ConnectModal";
 import { type OrbytProject } from "@/lib/data";
 
+function StatusBadge({ status }: { status: 'looking_for_team' | 'in_progress' | 'done' }) {
+  const config = {
+    looking_for_team: { label: "Looking for Team", color: "bg-blue-500/20 text-blue-400 border-blue-500/30" },
+    in_progress: { label: "In Progress", color: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30" },
+    done: { label: "Done", color: "bg-green-500/20 text-green-400 border-green-500/30" },
+  };
+  const { label, color } = config[status];
+  return (
+    <span className={`${color} border rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]`}>
+      {label}
+    </span>
+  );
+}
+
 export function ProjectCard({ project, recommended, captainName, captainAvatar, captainRating }: {
   project: OrbytProject;
   recommended?: boolean;
@@ -22,7 +36,7 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar, 
       <>
         <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 w-[300px] flex-shrink-0 snap-start">
           <div className="flex justify-between">
-            <span className="bg-[#2A2A2A] text-[#E2E2E2] rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]">Project</span>
+            <StatusBadge status={project.status} />
             <span className="bg-[#2A2A2A] text-white rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]">⚡ {project.matchScore}% match</span>
           </div>
           <h3 className="text-white text-[16px] mt-3.5 mb-2">{project.name}</h3>
@@ -51,7 +65,10 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar, 
     <>
       <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 hover:border-[#E2E2E2] transition cursor-pointer">
         <div className="flex justify-between items-start gap-3">
-          <h3 className="text-white text-[17px]">{project.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-white text-[17px]">{project.name}</h3>
+            <StatusBadge status={project.status} />
+          </div>
           <span className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] flex-shrink-0">{project.createdAt}</span>
         </div>
         <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre] leading-[1.6] mt-3" style={{ display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{project.description}</p>

@@ -11,12 +11,14 @@ import { useAuth } from "@/lib/auth";
 export const Route = createFileRoute("/dashboard")({ component: Dashboard });
 
 const FILTERS = ["All","Projects","Users","Best Matches","Newly Added"] as const;
+const STATUS_FILTERS = ["All Status", "Looking for Team", "In Progress", "Done"] as const;
 
 function Dashboard() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<typeof FILTERS[number]>("All");
+  const [statusFilter, setStatusFilter] = useState<typeof STATUS_FILTERS[number]>("All Status");
   const [sort, setSort] = useState("Match Score");
   const [loading, setLoading] = useState(true);
   const [projects, setProjects] = useState<OrbytProject[]>([]);
@@ -65,8 +67,20 @@ function Dashboard() {
 
   const filteredProjects = useMemo(() => {
     const q = search.toLowerCase();
-    return projects.filter(p => !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.skillsHave.some(s => s.toLowerCase().includes(q)) || p.skillsNeed.some(n => n.skill.toLowerCase().includes(q)));
-  }, [search, projects]);
+    let filtered = projects.filter(p => !q || p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q) || p.skillsHave.some(s => s.toLowerCase().includes(q)) || p.skillsNeed.some(n => n.skill.toLowerCase().includes(q)));
+
+    // Apply status filter
+    if (statusFilter !== "All Status") {
+      const statusMap = {
+        "Looking for Team": "looking_for_team",
+        "In Progress": "in_progress",
+        "Done": "done",
+      };
+      filtered = filtered.filter(p => p.status === statusMap[statusFilter as keyof typeof statusMap]);
+    }
+
+    return filtered;
+  }, [search, projects, statusFilter]);
 
   const filteredUsers = useMemo(() => {
     const q = search.toLowerCase();
@@ -91,10 +105,16 @@ function Dashboard() {
                   className={`whitespace-nowrap rounded-[999px] px-[18px] py-2 text-[14px] font-[Proza_Libre] transition border ${filter === f ? "bg-white text-black border-white" : "bg-[#1A1A1A] text-[#A1A1A1] border-[#2A2A2A] hover:border-[#E2E2E2]"}`}>{f}</button>
               ))}
             </div>
-            <select value={sort} onChange={e => setSort(e.target.value)}
-              className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[10px] px-3.5 py-2 text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
-              <option>Match Score ↓</option><option>Newest</option><option>Rating</option>
-            </select>
+            <div className="flex gap-2 items-center">
+              <select value={statusFilter} onChange={e => setStatusFilter(e.target.value as typeof STATUS_FILTERS[number])}
+                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[10px] px-3.5 py-2 text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
+                {STATUS_FILTERS.map(s => <option key={s}>{s}</option>)}
+              </select>
+              <select value={sort} onChange={e => setSort(e.target.value)}
+                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[10px] px-3.5 py-2 text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
+                <option>Match Score ↓</option><option>Newest</option><option>Rating</option>
+              </select>
+            </div>
           </div>
         </div>
 
