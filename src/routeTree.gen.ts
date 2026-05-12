@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as RatingsRouteImport } from './routes/ratings'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ConnectionsRouteImport } from './routes/connections'
@@ -26,6 +27,11 @@ const SignupRoute = SignupRouteImport.update({
 const RatingsRoute = RatingsRouteImport.update({
   id: '/ratings',
   path: '/ratings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/connections': typeof ConnectionsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/connections': typeof ConnectionsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/connections': typeof ConnectionsRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ratings': typeof RatingsRoute
   '/signup': typeof SignupRoute
   '/profile/$userId': typeof ProfileUserIdRoute
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/connections'
     | '/dashboard'
     | '/login'
+    | '/onboarding'
     | '/ratings'
     | '/signup'
     | '/profile/$userId'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/connections'
     | '/dashboard'
     | '/login'
+    | '/onboarding'
     | '/ratings'
     | '/signup'
     | '/profile/$userId'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/connections'
     | '/dashboard'
     | '/login'
+    | '/onboarding'
     | '/ratings'
     | '/signup'
     | '/profile/$userId'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   ConnectionsRoute: typeof ConnectionsRoute
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   RatingsRoute: typeof RatingsRoute
   SignupRoute: typeof SignupRoute
   ProfileUserIdRoute: typeof ProfileUserIdRoute
@@ -148,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/ratings'
       fullPath: '/ratings'
       preLoaderRoute: typeof RatingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -200,6 +220,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConnectionsRoute: ConnectionsRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   RatingsRoute: RatingsRoute,
   SignupRoute: SignupRoute,
   ProfileUserIdRoute: ProfileUserIdRoute,

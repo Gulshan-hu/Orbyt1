@@ -83,6 +83,7 @@ function Onboarding() {
   const { show } = useToast();
   const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
+  const [checkingProfile, setCheckingProfile] = useState(true);
   const [data, setData] = useState<FormData>({
     university: "",
     major: "",
@@ -102,6 +103,34 @@ function Onboarding() {
   useEffect(() => {
     if (!authLoading && !user) {
       navigate({ to: "/login" });
+    }
+  }, [user, authLoading, navigate]);
+
+  // Check if user has already completed onboarding
+  useEffect(() => {
+    const checkProfile = async () => {
+      if (!user) return;
+
+      setCheckingProfile(true);
+
+      // Fetch user profile and skills
+      const [{ data: profile }, { data: userSkills }] = await Promise.all([
+        supabase.from('users').select('university, major').eq('id', user.id).single(),
+        supabase.from('user_skills').select('skill').eq('user_id', user.id),
+      ]);
+
+      // If user has skills, they've completed onboarding (university/major are set by default)
+      // Only redirect if they have at least one skill
+      if (userSkills && userSkills.length > 0) {
+        navigate({ to: "/dashboard" });
+        return;
+      }
+
+      setCheckingProfile(false);
+    };
+
+    if (user && !authLoading) {
+      checkProfile();
     }
   }, [user, authLoading, navigate]);
 
@@ -158,14 +187,23 @@ function Onboarding() {
   return (
     <div className="bg-black min-h-screen text-white">
       <Navbar />
-      <Progress step={step} />
-      <div className="min-h-screen flex items-center justify-center px-6 pt-[200px] pb-20">
-        <div className="w-full max-w-[500px]">
-          <AnimatePresence mode="wait">
-            <motion.div key={step}
-              initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}
-              transition={{ duration: 0.3 }}
-              className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-10">
+      {checkingProfile ? (
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-[#A1A1A1] font-[Proza_Libre]">Loading...</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          <Progress step={step} />
+          <div className="min-h-screen flex items-center justify-center px-6 pt-[200px] pb-20">
+            <div className="w-full max-w-[500px]">
+              <AnimatePresence mode="wait">
+                <motion.div key={step}
+                  initial={{ opacity: 0, x: 60 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -60 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-10">
 
               {step === 1 && (
                 <>
@@ -297,6 +335,8 @@ function Onboarding() {
           </AnimatePresence>
         </div>
       </div>
+      </>
+      )}
     </div>
   );
 }
