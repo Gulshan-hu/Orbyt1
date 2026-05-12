@@ -399,13 +399,37 @@ export async function submitRating(args: {
 export function projectMatchScore(myskills: string[], project: OrbytProject): number {
   if (!project.skillsNeed.length) return 0;
   const mine = new Set(myskills);
-  const overlap = project.skillsNeed.filter(n => mine.has(n.skill)).length;
-  return Math.round((overlap / project.skillsNeed.length) * 100);
+
+  // Calculate how many of the project's needed skills you have
+  const matchedNeeds = project.skillsNeed.filter(n => mine.has(n.skill)).length;
+
+  // Higher score if you match more of what they need
+  const needScore = (matchedNeeds / project.skillsNeed.length) * 100;
+
+  // Bonus: if you have skills they already have (can contribute more)
+  const haveSet = new Set(project.skillsHave);
+  const matchedHave = myskills.filter(s => haveSet.has(s)).length;
+  const haveBonus = project.skillsHave.length > 0 ? (matchedHave / project.skillsHave.length) * 20 : 0;
+
+  // Weighted score: 80% based on needed skills, 20% bonus for matching existing skills
+  return Math.min(100, Math.round(needScore * 0.8 + haveBonus));
 }
 
 export function userMatchScore(myskills: string[], otherSkills: string[]): number {
-  if (!otherSkills.length) return 0;
+  if (!otherSkills.length || !myskills.length) return 0;
+
   const mine = new Set(myskills);
+  const theirs = new Set(otherSkills);
+
+  // Skills they have that you don't (complementary - they can teach you)
   const complementary = otherSkills.filter(s => !mine.has(s)).length;
-  return Math.round((complementary / otherSkills.length) * 100);
+
+  // Skills you both have (common ground - easier collaboration)
+  const overlap = otherSkills.filter(s => mine.has(s)).length;
+
+  // Balanced score: 60% complementary (diversity), 40% overlap (common ground)
+  const complementaryScore = (complementary / otherSkills.length) * 60;
+  const overlapScore = (overlap / otherSkills.length) * 40;
+
+  return Math.round(complementaryScore + overlapScore);
 }
