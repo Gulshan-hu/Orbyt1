@@ -6,27 +6,28 @@ import { Button } from "@/components/Button";
 import { Input, Textarea, Select, FieldLabel } from "@/components/Input";
 import { Tag } from "@/components/Tag";
 import { Logo } from "@/components/Logo";
-import { OtpInput } from "@/components/OtpInput";
 import { SKILL_CATEGORIES, UNIVERSITIES, MAJORS } from "@/lib/constants";
-import { sendSignupOtp, verifySignupOtp, signInWithGoogle } from "@/lib/auth";
 import { setUserSkills, createProjectWithSkills } from "@/lib/data";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
 
-export const Route = createFileRoute("/signup")({ component: Signup });
+export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
 interface FormData {
-  firstName: string; lastName: string; email: string;
-  university: string; universityOther: string; major: string;
+  university: string;
+  major: string;
   skills: string[];
   hasProject: boolean | null;
-  projectName: string; projectDesc: string;
-  projectHave: string[]; projectNeed: string[];
+  projectName: string;
+  projectDesc: string;
+  projectHave: string[];
+  projectNeed: string[];
   projectNeedNotes: Record<string, string>;
   projectLink: string;
 }
 
-const STEP_NAMES = ["Info", "Verify Email", "Skills", "Project?", "Project Details", "You're ready!"];
+const STEP_NAMES = ["University & Major", "Skills", "Project?", "Project Details", "You're ready!"];
 
 function Progress({ step }: { step: number }) {
   return (
@@ -77,95 +78,60 @@ function StepFooter({ onBack, right }: { onBack?: () => void; right: React.React
   );
 }
 
-function Signup() {
+function Onboarding() {
   const navigate = useNavigate();
   const { show } = useToast();
+  const { user, loading: authLoading } = useAuth();
   const [step, setStep] = useState(1);
   const [data, setData] = useState<FormData>({
-    firstName: "", lastName: "", email: "",
-    university: "", universityOther: "", major: "",
-    skills: [], hasProject: null,
-    projectName: "", projectDesc: "",
-    projectHave: [], projectNeed: [], projectNeedNotes: {},
+    university: "",
+    major: "",
+    skills: [],
+    hasProject: null,
+    projectName: "",
+    projectDesc: "",
+    projectHave: [],
+    projectNeed: [],
+    projectNeedNotes: {},
     projectLink: "",
   });
   const [skillSearch, setSkillSearch] = useState("");
   const [haveSearch, setHaveSearch] = useState("");
   const [needSearch, setNeedSearch] = useState("");
 
-  // OTP state for step 2
-  const [otp, setOtp] = useState("");
-  const [otpError, setOtpError] = useState("");
-  const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate({ to: "/login" });
+    }
+  }, [user, authLoading, navigate]);
 
   const update = <K extends keyof FormData>(k: K, v: FormData[K]) => setData(d => ({ ...d, [k]: v }));
   const toggleSkill = (s: string) => update("skills", data.skills.includes(s) ? data.skills.filter(x => x !== s) : [...data.skills, s]);
   const toggleHave = (s: string) => update("projectHave", data.projectHave.includes(s) ? data.projectHave.filter(x => x !== s) : [...data.projectHave, s]);
   const toggleNeed = (s: string) => update("projectNeed", data.projectNeed.includes(s) ? data.projectNeed.filter(x => x !== s) : [...data.projectNeed, s]);
 
-  const step1Valid = data.firstName.trim() && data.lastName.trim() && /\S+@\S+/.test(data.email)
-    && data.university && (data.university !== "Digər" || data.universityOther.trim()) && data.major;
-  const step5Valid = data.projectName.trim() && data.projectDesc.trim();
-
-  const sendCode = async () => {
-    const resolvedUni = data.university === "Digər" ? data.universityOther.trim() : data.university;
-    const { error, data: authData } = await sendSignupOtp(data.email, {
-      first_name: data.firstName.trim(),
-      last_name: data.lastName.trim(),
-      university: resolvedUni,
-      major: data.major,
-    });
-    if (error) {
-      const errorMsg = error.message || "";
-
-      if (errorMsg.includes("once every 60 seconds")) {
-        show("Please wait 60 seconds before requesting another code for this email.");
-        setCooldown(60);
-      } else if (errorMsg.includes("rate limit") || errorMsg.includes("Email rate limit exceeded")) {
-        show("Too many requests. Please wait a few minutes or use a different email.");
-      } else if (errorMsg.includes("already registered") || errorMsg.includes("User already registered")) {
-        show("This email is already registered. Redirecting to login...");
-        setTimeout(() => navigate({ to: "/login" }), 2000);
-      } else if (errorMsg.includes("Invalid") || errorMsg.includes("invalid")) {
-        show("Invalid email address. Please check and try again.");
-      } else {
-        show(`Error: ${errorMsg || "Failed to send code. Please try again."}`);
-      }
-      return false;
-    }
-    setCooldown(60);
-    show(`Verification code sent to ${data.email}`);
-    return true;
-  };
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown(c => c - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
-
-  const goToVerify = async () => {
-    const success = await sendCode();
-    if (success) {
-      setOtp("");
-      setOtpError("");
-      setStep(2);
-    }
-  };
-
-  const verifyAndContinue = async () => {
-    const { data: authData, error } = await verifySignupOtp(data.email, otp);
-    if (error || !authData.user) {
-      setOtpError("Incorrect or expired code. Try again.");
-    } else {
-      setOtpError("");
-      setStep(3);
-    }
-  };
+  const step1Valid = data.university && data.major;
+  const step4Valid = data.projectName.trim() && data.projectDesc.trim();
 
   const handleFinish = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
+
+    // Update user metadata with university and major
+    await supabase.auth.updateUser({
+      data: {
+        university: data.university,
+        major: data.major,
+      },
+    });
+
+    // Update users table directly
+    await supabase
+      .from('users')
+      .update({
+        university: data.university,
+        major: data.major,
+      })
+      .eq('id', user.id);
 
     // Set user skills
     await setUserSkills(user.id, data.skills);
@@ -189,13 +155,6 @@ function Signup() {
     navigate({ to: "/dashboard" });
   };
 
-  const handleGoogleSignIn = async () => {
-    const { error } = await signInWithGoogle();
-    if (error) {
-      show(error.message || "Failed to sign in with Google");
-    }
-  };
-
   return (
     <div className="bg-black min-h-screen text-white">
       <Navbar />
@@ -210,41 +169,15 @@ function Signup() {
 
               {step === 1 && (
                 <>
-                  <h2 className="text-white text-[26px] mb-2">Hello! Let's get acquainted.</h2>
-                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">Sign up to get started.</p>
-                  <div className="flex flex-col gap-4 mb-6">
-                    <Button onClick={handleGoogleSignIn} full variant="ghost" className="flex items-center justify-center gap-3">
-                      <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z" fill="#4285F4"/>
-                        <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
-                        <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-                        <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
-                      </svg>
-                      Continue with Google
-                    </Button>
-                  </div>
-                  <div className="flex items-center gap-3 mb-6">
-                    <div className="flex-1 h-px bg-[#2A2A2A]" />
-                    <span className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">or</span>
-                    <div className="flex-1 h-px bg-[#2A2A2A]" />
-                  </div>
+                  <h2 className="text-white text-[24px] mb-2">Tell us about yourself</h2>
+                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">We need a few more details to complete your profile.</p>
                   <div className="flex flex-col gap-5">
-                    <div><FieldLabel>First name</FieldLabel><Input placeholder="Alex" value={data.firstName} onChange={e => update("firstName", e.target.value)} /></div>
-                    <div><FieldLabel>Last name</FieldLabel><Input placeholder="Johnson" value={data.lastName} onChange={e => update("lastName", e.target.value)} /></div>
-                    <div>
-                      <FieldLabel>Email</FieldLabel>
-                      <Input type="email" placeholder="alex@gmail.com" value={data.email} onChange={e => update("email", e.target.value)} />
-                      <p className="text-[12px] text-[#A1A1A1] mt-1.5 font-[Proza_Libre]">We'll send a verification code. Tip: Use aliases like yourmail+test1@gmail.com for testing</p>
-                    </div>
                     <div>
                       <FieldLabel>University</FieldLabel>
                       <Select value={data.university} onChange={e => update("university", e.target.value)}>
                         <option value="">Select your university</option>
                         {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
                       </Select>
-                      {data.university === "Digər" && (
-                        <div className="mt-3"><Input placeholder="Enter your university name" value={data.universityOther} onChange={e => update("universityOther", e.target.value)} /></div>
-                      )}
                     </div>
                     <div>
                       <FieldLabel>Major</FieldLabel>
@@ -253,39 +186,12 @@ function Signup() {
                         {MAJORS.map(m => <option key={m} value={m}>{m}</option>)}
                       </Select>
                     </div>
-                    <StepFooter right={<Button disabled={!step1Valid} onClick={goToVerify}>Continue</Button>} />
-                    <p className="text-center text-[13px] text-[#A1A1A1] font-[Proza_Libre]">
-                      Already have an account? <button onClick={() => navigate({ to: "/login" })} className="text-white hover:underline">Log in</button>
-                    </p>
+                    <StepFooter right={<Button disabled={!step1Valid} onClick={() => setStep(2)}>Continue</Button>} />
                   </div>
                 </>
               )}
 
               {step === 2 && (
-                <div className="text-center">
-                  <h2 className="text-white text-[26px] mb-2">Check your inbox</h2>
-                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">
-                    We sent a 6-digit code to <span className="text-white">{data.email}</span>
-                  </p>
-                  <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(""); }} length={6} />
-                  {otpError && <p className="text-[#FF6B6B] text-[13px] font-[Proza_Libre] mt-3">{otpError}</p>}
-                  <div className="mt-5">
-                    <Button
-                      variant="ghost"
-                      disabled={cooldown > 0}
-                      onClick={() => { sendCode(); setOtp(""); }}
-                    >
-                      {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
-                    </Button>
-                  </div>
-                  <StepFooter
-                    onBack={() => setStep(1)}
-                    right={<Button disabled={otp.length !== 6} onClick={verifyAndContinue}>Verify</Button>}
-                  />
-                </div>
-              )}
-
-              {step === 3 && (
                 <>
                   <h2 className="text-white text-[24px] mb-2">Select your skills</h2>
                   <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre] mb-6">Check everything you know — the more the better.</p>
@@ -294,16 +200,16 @@ function Signup() {
                     <SkillSelector selected={data.skills} onToggle={toggleSkill} search={skillSearch} />
                   </div>
                   <div className="mt-6 flex items-center justify-between gap-3">
-                    <Button variant="ghost" onClick={() => setStep(2)}>Back</Button>
+                    <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
                     <div className="flex items-center gap-3">
                       <span className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">{data.skills.length} selected</span>
-                      <Button disabled={data.skills.length === 0} onClick={() => setStep(4)}>Continue</Button>
+                      <Button disabled={data.skills.length === 0} onClick={() => setStep(3)}>Continue</Button>
                     </div>
                   </div>
                 </>
               )}
 
-              {step === 4 && (
+              {step === 3 && (
                 <>
                   <h2 className="text-white text-[24px] mb-8">Do you have a project you're working on?</h2>
                   <div className="flex flex-col gap-4">
@@ -312,7 +218,7 @@ function Signup() {
                       { key: false, t: "Not yet", s: "Join existing projects and apply your skills" },
                     ].map(opt => (
                       <button key={String(opt.key)}
-                        onClick={() => { update("hasProject", opt.key); setStep(opt.key ? 5 : 6); }}
+                        onClick={() => { update("hasProject", opt.key); setStep(opt.key ? 4 : 5); }}
                         className={`text-left bg-[#111111] border rounded-[16px] p-7 transition hover:border-[#E2E2E2] ${data.hasProject === opt.key ? "border-white bg-[#1A1A1A]" : "border-[#2A2A2A]"}`}>
                         <div className="flex justify-between items-center">
                           <div>
@@ -324,11 +230,11 @@ function Signup() {
                       </button>
                     ))}
                   </div>
-                  <StepFooter onBack={() => setStep(3)} right={null} />
+                  <StepFooter onBack={() => setStep(2)} right={null} />
                 </>
               )}
 
-              {step === 5 && (
+              {step === 4 && (
                 <>
                   <h2 className="text-white text-[24px] mb-6">Tell us about your project</h2>
                   <div className="flex flex-col gap-5">
@@ -365,14 +271,14 @@ function Signup() {
                     </div>
                     <div><FieldLabel>Project link (optional)</FieldLabel><Input placeholder="GitHub, Figma, or any other link" value={data.projectLink} onChange={e => update("projectLink", e.target.value)} /></div>
                     <StepFooter
-                      onBack={() => setStep(4)}
-                      right={<Button disabled={!step5Valid} onClick={() => setStep(6)}>Continue</Button>}
+                      onBack={() => setStep(3)}
+                      right={<Button disabled={!step4Valid} onClick={() => setStep(5)}>Continue</Button>}
                     />
                   </div>
                 </>
               )}
 
-              {step === 6 && (
+              {step === 5 && (
                 <div className="text-center py-5">
                   <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: [0.8, 1.1, 1], opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-center text-white"><Logo height={64} /></motion.div>

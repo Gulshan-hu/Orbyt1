@@ -68,4 +68,18 @@ export async function verifyEmailChangeOtp(newEmail: string, token: string) {
   return supabase.auth.verifyOtp({ email: newEmail, token, type: "email_change" });
 }
 
+export async function signInWithGoogle() {
+  const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/onboarding` : undefined;
+  return supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
+  });
+}
+
 export type { User, Session };
