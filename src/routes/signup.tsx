@@ -30,7 +30,7 @@ const STEP_NAMES = ["Info", "Verify Email", "Skills", "Project?", "Project Detai
 
 function Progress({ step }: { step: number }) {
   return (
-    <div className="fixed top-16 left-0 right-0 z-40 bg-black border-b border-[#2A2A2A] py-6">
+    <div className="fixed top-16 left-0 right-0 z-40 border-b border-[#2A2A2A] py-6" style={{ background: 'transparent' }}>
       <div className="flex items-center justify-center gap-2 max-w-md mx-auto px-6">
         {STEP_NAMES.map((_, i) => {
           const idx = i + 1;
@@ -197,7 +197,7 @@ function Signup() {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="min-h-screen text-white" style={{ background: 'transparent' }}>
       <Navbar />
       <Progress step={step} />
       <div className="min-h-screen flex items-center justify-center px-6 pt-[200px] pb-20">

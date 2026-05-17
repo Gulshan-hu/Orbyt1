@@ -57,7 +57,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="min-h-screen text-white" style={{ background: 'transparent' }}>
       <Navbar />
       <div className="pt-16 flex">
         <div className="hidden lg:block fixed top-16 left-0">{sidebar}</div>

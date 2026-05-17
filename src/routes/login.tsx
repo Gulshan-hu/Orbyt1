@@ -75,7 +75,7 @@ function LoginPage() {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="min-h-screen text-white" style={{ background: 'transparent' }}>
       <Navbar />
       <div className="min-h-screen flex items-center justify-center px-6 pt-20">
         <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-10 w-full max-w-[440px]">
