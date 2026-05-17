@@ -11,6 +11,7 @@ import {
 import appCss from "../styles.css?url";
 import { ToastProvider } from "@/components/Toast";
 import { NotificationsProvider } from "@/lib/notifications";
+import { FloatingParticlesBackground } from "@/components/FloatingParticlesBackground";
 
 function NotFoundComponent() {
   return (
@@ -121,9 +122,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <FloatingParticlesBackground />
       <ToastProvider>
         <NotificationsProvider>
-          <Outlet />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <Outlet />
+          </div>
         </NotificationsProvider>
       </ToastProvider>
     </QueryClientProvider>
