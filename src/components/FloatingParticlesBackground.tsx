@@ -22,8 +22,8 @@ const CONFIG = {
   mouseInfluence: 120,
   backgroundColor: 'transparent',
   particleColor: '#ffffff',
-  mouseGravity: 'repel' as const,
-  gravityStrength: 50,
+  mouseGravity: 'attract' as const,
+  gravityStrength: 80,
 };
 
 export function FloatingParticlesBackground() {
