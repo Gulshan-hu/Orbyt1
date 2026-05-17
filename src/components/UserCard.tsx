@@ -26,7 +26,7 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5 mt-3.5">{user.skills.slice(0, 5).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
-          <div className="text-[12px] text-[#A1A1A1] font-[Proza_Libre] mt-3.5">★ {user.averageRating} · {user.projectCount} projects</div>
+          <div className="text-[12px] text-[#A1A1A1] font-[Proza_Libre] mt-3.5">{user.projectCount} projects</div>
           <div className="flex gap-2 mt-4">
             <Link to="/profile/$userId" params={{ userId: user.id }} className="flex-1"><Button variant="ghost" full className="!text-[13px] !px-3 !py-2.5">View Profile</Button></Link>
             <Button full className="flex-1 !text-[13px] !px-3 !py-2.5" onClick={() => setOpen(true)}>Connect →</Button>
@@ -48,7 +48,7 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
           </div>
         </div>
         <div className="flex flex-wrap gap-1.5 mt-3.5">{user.skills.map(s => <Tag key={s} small static>{s}</Tag>)}</div>
-        <div className="text-[12px] text-[#A1A1A1] font-[Proza_Libre] mt-4">★ {user.averageRating} · {user.connectionCount} connections · {user.projectCount} projects</div>
+        <div className="text-[12px] text-[#A1A1A1] font-[Proza_Libre] mt-4">{user.connectionCount} connections · {user.projectCount} projects</div>
         <div className="flex gap-2 mt-4">
           <Link to="/profile/$userId" params={{ userId: user.id }} className="flex-1"><Button variant="ghost" full>View Profile</Button></Link>
           <Button full onClick={() => setOpen(true)}>Connect</Button>

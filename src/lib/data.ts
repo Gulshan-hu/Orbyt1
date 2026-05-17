@@ -357,12 +357,14 @@ export async function updateUserProfile(id: string, args: {
   university: string;
   major: string;
   skills: string[];
+  avatar_url?: string | null;
 }) {
   await supabase.from("users").update({
     first_name: args.first_name,
     last_name: args.last_name,
     university: args.university,
     major: args.major,
+    avatar_url: args.avatar_url,
   }).eq("id", id);
   await supabase.from("user_skills").delete().eq("user_id", id);
   if (args.skills.length) await supabase.from("user_skills").insert(args.skills.map(s => ({ user_id: id, skill: s })));

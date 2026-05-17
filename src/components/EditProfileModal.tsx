@@ -7,6 +7,7 @@ import { OtpInput } from "./OtpInput";
 import { UNIVERSITIES, MAJORS } from "@/lib/constants";
 import { updateUserProfile, type OrbytUser } from "@/lib/data";
 import { requestEmailChange, verifyEmailChangeOtp } from "@/lib/auth";
+import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./Toast";
 
 export function EditProfileModal({ open, onClose, user, onSaved }: { open: boolean; onClose: () => void; user: OrbytUser; onSaved: () => void }) {
@@ -21,6 +22,8 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
   const [universityOther, setUniversityOther] = useState(initialUniOther);
   const [major, setMajor] = useState(user.major);
   const [skills, setSkills] = useState<string[]>(user.skills);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(user.avatarUrl || null);
   const { show } = useToast();
 
   // Email change verification
@@ -37,16 +40,67 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
 
   const toggle = (s: string) => setSkills(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        show("Image must be less than 2MB");
+        return;
+      }
+      setAvatarFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const resolvedUni = university === "Digər" ? universityOther.trim() : university;
 
   const persist = async () => {
+    let avatarUrl = user.avatarUrl;
+
+    // Upload avatar if changed
+    if (avatarFile) {
+      const fileExt = avatarFile.name.split('.').pop();
+      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, avatarFile, { upsert: true });
+
+      if (uploadError) {
+        show("Failed to upload avatar");
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
+      avatarUrl = publicUrl;
+    }
+
     await updateUserProfile(user.id, {
       first_name: firstName.trim() || user.firstName,
       last_name: lastName.trim() || user.lastName,
       university: resolvedUni || user.university,
       major,
       skills,
+      avatar_url: avatarUrl,
     });
+
+    // Update auth metadata for real-time sync
+    await supabase.auth.updateUser({
+      data: {
+        first_name: firstName.trim() || user.firstName,
+        last_name: lastName.trim() || user.lastName,
+        university: resolvedUni || user.university,
+        major,
+        avatar_url: avatarUrl,
+      },
+    });
+
     show("Profile updated successfully");
     onSaved();
     onClose();
@@ -89,6 +143,7 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
     setFirstName(user.firstName); setLastName(user.lastName); setEmail(user.email);
     setUniversity(initialUni); setUniversityOther(initialUniOther);
     setMajor(user.major); setSkills(user.skills);
+    setAvatarFile(null); setAvatarPreview(user.avatarUrl || null);
     setVerifying(false); setOtp(""); setOtpError("");
     onClose();
   };
@@ -99,6 +154,33 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
         <>
           <h2 className="text-white text-[20px] mb-5">Edit Profile</h2>
           <div className="flex flex-col gap-3.5 max-h-[65vh] overflow-y-auto pr-1">
+            <div>
+              <FieldLabel>Profile Photo</FieldLabel>
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 rounded-full bg-[#2A2A2A] flex items-center justify-center overflow-hidden">
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-white text-2xl">{firstName.charAt(0)}{lastName.charAt(0)}</span>
+                  )}
+                </div>
+                <div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                    id="avatar-upload"
+                  />
+                  <label htmlFor="avatar-upload">
+                    <Button variant="ghost" as="span" className="cursor-pointer">
+                      Upload Photo
+                    </Button>
+                  </label>
+                  <p className="text-[11px] text-[#A1A1A1] mt-1 font-[Proza_Libre]">Max 2MB</p>
+                </div>
+              </div>
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div><FieldLabel>First name</FieldLabel><Input value={firstName} onChange={e => setFirstName(e.target.value)} /></div>
               <div><FieldLabel>Last name</FieldLabel><Input value={lastName} onChange={e => setLastName(e.target.value)} /></div>
