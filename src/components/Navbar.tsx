@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
 import { Avatar } from "./Avatar";
+import { NotificationsDropdown } from "./NotificationsDropdown";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -30,8 +31,9 @@ export function Navbar() {
             <>
               <Link to="/dashboard" className="text-[#A1A1A1] hover:text-white text-[14px] font-[Proza_Libre] transition">Dashboard</Link>
               <Link to="/showcase" className="text-[#A1A1A1] hover:text-white text-[14px] font-[Proza_Libre] transition">Showcase</Link>
+              <NotificationsDropdown />
               <Link to="/profile/$userId" params={{ userId: user.id }}>
-                <Avatar name={fullName} size={36} />
+                <Avatar name={fullName} size={36} avatarUrl={user.user_metadata?.avatar_url} />
               </Link>
             </>
           ) : (

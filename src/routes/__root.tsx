@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { ToastProvider } from "@/components/Toast";
+import { NotificationsProvider } from "@/lib/notifications";
 
 function NotFoundComponent() {
   return (
@@ -121,7 +122,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ToastProvider>
-        <Outlet />
+        <NotificationsProvider>
+          <Outlet />
+        </NotificationsProvider>
       </ToastProvider>
     </QueryClientProvider>
   );

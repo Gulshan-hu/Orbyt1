@@ -395,6 +395,42 @@ export async function rejectConnectionRequest(reqId: string) {
   await supabase.from("connection_requests").update({ status: "rejected" }).eq("id", reqId);
 }
 
+export async function fetchFriendsForUser(userId: string): Promise<OrbytUser[]> {
+  const { data: friendRows } = await supabase
+    .from("friends")
+    .select("user_a, user_b")
+    .or(`user_a.eq.${userId},user_b.eq.${userId}`);
+
+  if (!friendRows || friendRows.length === 0) return [];
+
+  const friendIds = friendRows.map(f => f.user_a === userId ? f.user_b : f.user_a);
+
+  const [{ data: users }, { data: skills }] = await Promise.all([
+    supabase.from("users").select("*").in("id", friendIds),
+    supabase.from("user_skills").select("user_id, skill").in("user_id", friendIds),
+  ]);
+
+  const skillsMap = (skills ?? []).reduce((acc: Record<string, string[]>, s: any) => {
+    if (!acc[s.user_id]) acc[s.user_id] = [];
+    acc[s.user_id].push(s.skill);
+    return acc;
+  }, {});
+
+  return (users ?? []).map((u: any) => ({
+    id: u.id,
+    firstName: u.first_name,
+    lastName: u.last_name,
+    email: u.email,
+    university: u.university,
+    major: u.major,
+    avatarUrl: u.avatar_url,
+    averageRating: u.average_rating,
+    skills: skillsMap[u.id] || [],
+    projectCount: 0,
+    connectionCount: 0,
+  }));
+}
+
 export async function submitRating(args: {
   fromUserId: string;
   toUserId: string;
