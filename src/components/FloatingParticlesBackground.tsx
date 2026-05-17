@@ -18,7 +18,7 @@ const CONFIG = {
   particleSize: 2,
   particleOpacity: 0.5,
   glowIntensity: 12,
-  movementSpeed: 0.4,
+  movementSpeed: 0.2,
   mouseInfluence: 120,
   backgroundColor: 'transparent',
   particleColor: '#ffffff',
