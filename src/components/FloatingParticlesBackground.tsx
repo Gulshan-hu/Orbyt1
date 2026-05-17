@@ -77,8 +77,8 @@ export function FloatingParticlesBackground() {
           const normalizedDy = dy / distance;
           const gravityForce = force * (CONFIG.gravityStrength / 100);
 
-          particle.vx -= normalizedDx * gravityForce;
-          particle.vy -= normalizedDy * gravityForce;
+          particle.vx += normalizedDx * gravityForce;
+          particle.vy += normalizedDy * gravityForce;
 
           const targetGlow = 1 + force * 2;
           const easeSpeed = 0.15;
