@@ -14,7 +14,7 @@ export function ProjectDetailModal({ open, onClose, project, isCaptain, onConnec
   isCaptain: boolean;
   onConnect: () => void;
   onEdit: () => void;
-  members?: Array<{ id: string; firstName: string; lastName: string; averageRating: number }>;
+  members?: Array<{ id: string; firstName: string; lastName: string }>;
   onStatusChange?: () => void;
 }) {
   const displayMembers = members || [];
@@ -116,7 +116,6 @@ export function ProjectDetailModal({ open, onClose, project, isCaptain, onConnec
                     <Avatar name={n} size={28} />
                     <span className="text-white text-[13px] font-[Proza_Libre]">{n}</span>
                     {m.id === project.captainId && <span className="bg-[#2A2A2A] text-[#E2E2E2] rounded-[999px] px-2 py-0.5 text-[11px] font-[Proza_Libre]">Captain</span>}
-                    <span className="text-[#A1A1A1] text-[12px] ml-auto">★ {m.averageRating}</span>
                   </div>
                 );
               })}

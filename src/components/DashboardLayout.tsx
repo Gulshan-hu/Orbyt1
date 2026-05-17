@@ -9,7 +9,6 @@ const NAV = [
   { to: "/dashboard", label: "Discover", icon: "M12 2l9 7-9 13L3 9z" },
   { to: "/profile/me", label: "My Profile", icon: "M12 12a4 4 0 100-8 4 4 0 000 8zm-7 9a7 7 0 0114 0" },
   { to: "/connections", label: "Connections", icon: "M8 11a4 4 0 100-8 4 4 0 000 8zm8 0a4 4 0 100-8 4 4 0 000 8zM2 21a6 6 0 0112 0M14 21a6 6 0 0110-4" },
-  { to: "/ratings", label: "Ratings", icon: "M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z" },
 ];
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -21,7 +20,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   if (!user) return null;
 
   const fullName = `${user.user_metadata?.first_name || ""} ${user.user_metadata?.last_name || ""}`.trim();
-  const university = user.user_metadata?.university || "";
+  const major = user.user_metadata?.major || "";
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -31,10 +30,10 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   const sidebar = (
     <aside className="w-60 bg-[#0A0A0A] border-r border-[#2A2A2A] h-[calc(100vh-64px)] overflow-y-auto flex flex-col">
       <div className="p-5 flex items-center gap-3">
-        <Avatar name={fullName} size={44} />
+        <Avatar name={fullName} size={44} avatarUrl={user.user_metadata?.avatar_url} />
         <div className="min-w-0">
           <div className="text-white text-[13px] font-[Unbounded] truncate">{fullName}</div>
-          <div className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] truncate">{university}</div>
+          <div className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] truncate">{major}</div>
         </div>
       </div>
       <div className="border-t border-[#2A2A2A] my-2" />

@@ -15,6 +15,8 @@ import { useToast } from "@/components/Toast";
 export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
 interface FormData {
+  firstName: string;
+  lastName: string;
   university: string;
   major: string;
   skills: string[];
@@ -27,7 +29,7 @@ interface FormData {
   projectLink: string;
 }
 
-const STEP_NAMES = ["University & Major", "Skills", "Project?", "Project Details", "You're ready!"];
+const STEP_NAMES = ["Your Info", "University & Major", "Skills", "Project?", "Project Details", "You're ready!"];
 
 function Progress({ step }: { step: number }) {
   return (
@@ -85,6 +87,8 @@ function Onboarding() {
   const [step, setStep] = useState(1);
   const [checkingProfile, setCheckingProfile] = useState(true);
   const [data, setData] = useState<FormData>({
+    firstName: "",
+    lastName: "",
     university: "",
     major: "",
     skills: [],
@@ -115,15 +119,25 @@ function Onboarding() {
 
       // Fetch user profile and skills
       const [{ data: profile }, { data: userSkills }] = await Promise.all([
-        supabase.from('users').select('university, major').eq('id', user.id).single(),
+        supabase.from('users').select('first_name, last_name, university, major').eq('id', user.id).single(),
         supabase.from('user_skills').select('skill').eq('user_id', user.id),
       ]);
 
-      // If user has skills, they've completed onboarding (university/major are set by default)
-      // Only redirect if they have at least one skill
+      // If user has skills, they've completed onboarding
       if (userSkills && userSkills.length > 0) {
         navigate({ to: "/dashboard" });
         return;
+      }
+
+      // Pre-fill data from Google OAuth if available
+      if (profile) {
+        setData(d => ({
+          ...d,
+          firstName: profile.first_name || user.user_metadata?.first_name || "",
+          lastName: profile.last_name || user.user_metadata?.last_name || "",
+          university: profile.university || "",
+          major: profile.major || "",
+        }));
       }
 
       setCheckingProfile(false);
@@ -139,15 +153,18 @@ function Onboarding() {
   const toggleHave = (s: string) => update("projectHave", data.projectHave.includes(s) ? data.projectHave.filter(x => x !== s) : [...data.projectHave, s]);
   const toggleNeed = (s: string) => update("projectNeed", data.projectNeed.includes(s) ? data.projectNeed.filter(x => x !== s) : [...data.projectNeed, s]);
 
-  const step1Valid = data.university && data.major;
-  const step4Valid = data.projectName.trim() && data.projectDesc.trim();
+  const step1Valid = data.firstName.trim() && data.lastName.trim();
+  const step2Valid = data.university && data.major;
+  const step5Valid = data.projectName.trim() && data.projectDesc.trim();
 
   const handleFinish = async () => {
     if (!user) return;
 
-    // Update user metadata with university and major
+    // Update user metadata with all fields
     await supabase.auth.updateUser({
       data: {
+        first_name: data.firstName.trim(),
+        last_name: data.lastName.trim(),
         university: data.university,
         major: data.major,
       },
@@ -157,6 +174,8 @@ function Onboarding() {
     await supabase
       .from('users')
       .update({
+        first_name: data.firstName.trim(),
+        last_name: data.lastName.trim(),
         university: data.university,
         major: data.major,
       })
@@ -207,6 +226,24 @@ function Onboarding() {
 
               {step === 1 && (
                 <>
+                  <h2 className="text-white text-[24px] mb-2">Welcome! Let's get started</h2>
+                  <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">Tell us your name to complete your profile.</p>
+                  <div className="flex flex-col gap-5">
+                    <div>
+                      <FieldLabel>First name</FieldLabel>
+                      <Input placeholder="Alex" value={data.firstName} onChange={e => update("firstName", e.target.value)} />
+                    </div>
+                    <div>
+                      <FieldLabel>Last name</FieldLabel>
+                      <Input placeholder="Johnson" value={data.lastName} onChange={e => update("lastName", e.target.value)} />
+                    </div>
+                    <StepFooter right={<Button disabled={!step1Valid} onClick={() => setStep(2)}>Continue</Button>} />
+                  </div>
+                </>
+              )}
+
+              {step === 2 && (
+                <>
                   <h2 className="text-white text-[24px] mb-2">Tell us about yourself</h2>
                   <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">We need a few more details to complete your profile.</p>
                   <div className="flex flex-col gap-5">
@@ -224,12 +261,12 @@ function Onboarding() {
                         {MAJORS.map(m => <option key={m} value={m}>{m}</option>)}
                       </Select>
                     </div>
-                    <StepFooter right={<Button disabled={!step1Valid} onClick={() => setStep(2)}>Continue</Button>} />
+                    <StepFooter onBack={() => setStep(1)} right={<Button disabled={!step2Valid} onClick={() => setStep(3)}>Continue</Button>} />
                   </div>
                 </>
               )}
 
-              {step === 2 && (
+              {step === 3 && (
                 <>
                   <h2 className="text-white text-[24px] mb-2">Select your skills</h2>
                   <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre] mb-6">Check everything you know — the more the better.</p>
@@ -238,16 +275,16 @@ function Onboarding() {
                     <SkillSelector selected={data.skills} onToggle={toggleSkill} search={skillSearch} />
                   </div>
                   <div className="mt-6 flex items-center justify-between gap-3">
-                    <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
+                    <Button variant="ghost" onClick={() => setStep(2)}>Back</Button>
                     <div className="flex items-center gap-3">
                       <span className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">{data.skills.length} selected</span>
-                      <Button disabled={data.skills.length === 0} onClick={() => setStep(3)}>Continue</Button>
+                      <Button disabled={data.skills.length === 0} onClick={() => setStep(4)}>Continue</Button>
                     </div>
                   </div>
                 </>
               )}
 
-              {step === 3 && (
+              {step === 4 && (
                 <>
                   <h2 className="text-white text-[24px] mb-8">Do you have a project you're working on?</h2>
                   <div className="flex flex-col gap-4">
@@ -256,7 +293,7 @@ function Onboarding() {
                       { key: false, t: "Not yet", s: "Join existing projects and apply your skills" },
                     ].map(opt => (
                       <button key={String(opt.key)}
-                        onClick={() => { update("hasProject", opt.key); setStep(opt.key ? 4 : 5); }}
+                        onClick={() => { update("hasProject", opt.key); setStep(opt.key ? 5 : 6); }}
                         className={`text-left bg-[#111111] border rounded-[16px] p-7 transition hover:border-[#E2E2E2] ${data.hasProject === opt.key ? "border-white bg-[#1A1A1A]" : "border-[#2A2A2A]"}`}>
                         <div className="flex justify-between items-center">
                           <div>
@@ -268,11 +305,11 @@ function Onboarding() {
                       </button>
                     ))}
                   </div>
-                  <StepFooter onBack={() => setStep(2)} right={null} />
+                  <StepFooter onBack={() => setStep(3)} right={null} />
                 </>
               )}
 
-              {step === 4 && (
+              {step === 5 && (
                 <>
                   <h2 className="text-white text-[24px] mb-6">Tell us about your project</h2>
                   <div className="flex flex-col gap-5">
@@ -309,14 +346,14 @@ function Onboarding() {
                     </div>
                     <div><FieldLabel>Project link (optional)</FieldLabel><Input placeholder="GitHub, Figma, or any other link" value={data.projectLink} onChange={e => update("projectLink", e.target.value)} /></div>
                     <StepFooter
-                      onBack={() => setStep(3)}
-                      right={<Button disabled={!step4Valid} onClick={() => setStep(5)}>Continue</Button>}
+                      onBack={() => setStep(4)}
+                      right={<Button disabled={!step5Valid} onClick={() => setStep(6)}>Continue</Button>}
                     />
                   </div>
                 </>
               )}
 
-              {step === 5 && (
+              {step === 6 && (
                 <div className="text-center py-5">
                   <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: [0.8, 1.1, 1], opacity: 1 }} transition={{ duration: 0.8, ease: "easeOut" }}
                     className="flex justify-center text-white"><Logo height={64} /></motion.div>

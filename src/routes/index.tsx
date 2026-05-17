@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/Button";
 import { Logo } from "@/components/Logo";
+import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/")({ component: Index });
 
@@ -21,6 +22,15 @@ function SkillPill({ children }: { children: React.ReactNode }) {
 
 function Index() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate({ to: "/dashboard" });
+    } else {
+      navigate({ to: "/signup" });
+    }
+  };
 
   return (
     <div className="bg-black min-h-screen text-white">
@@ -41,7 +51,7 @@ function Index() {
             Orbyt matches university students with each other based on their skills and project needs.
           </motion.p>
           <motion.div {...fadeUp(0.3)} className="flex gap-3 mt-10 flex-wrap justify-center">
-            <Button onClick={() => navigate({ to: "/signup" })}>Get Started</Button>
+            <Button onClick={handleGetStarted}>Get Started</Button>
             <Button variant="ghost" onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}>How it works?</Button>
           </motion.div>
         </div>

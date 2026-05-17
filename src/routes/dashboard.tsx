@@ -112,7 +112,7 @@ function Dashboard() {
               </select>
               <select value={sort} onChange={e => setSort(e.target.value)}
                 className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[10px] px-3.5 py-2 text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
-                <option>Match Score ↓</option><option>Newest</option><option>Rating</option>
+                <option>Match Score ↓</option><option>Newest</option>
               </select>
             </div>
           </div>
@@ -133,7 +133,6 @@ function Dashboard() {
                   project={p}
                   recommended
                   captainName={captain ? `${captain.firstName} ${captain.lastName}` : "Captain"}
-                  captainRating={captain?.averageRating || 0}
                 />
               );
             })}
@@ -157,7 +156,6 @@ function Dashboard() {
                       key={p.id}
                       project={p}
                       captainName={captain ? `${captain.firstName} ${captain.lastName}` : "Captain"}
-                      captainRating={captain?.averageRating || 0}
                     />
                   );
                 })}

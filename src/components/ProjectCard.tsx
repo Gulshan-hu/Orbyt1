@@ -20,16 +20,14 @@ function StatusBadge({ status }: { status: 'looking_for_team' | 'in_progress' | 
   );
 }
 
-export function ProjectCard({ project, recommended, captainName, captainAvatar, captainRating }: {
+export function ProjectCard({ project, recommended, captainName, captainAvatar }: {
   project: OrbytProject;
   recommended?: boolean;
   captainName?: string;
   captainAvatar?: string;
-  captainRating?: number;
 }) {
   const [open, setOpen] = useState(false);
   const displayName = captainName || "Captain";
-  const displayRating = captainRating || 0;
 
   if (recommended) {
     return (
@@ -49,7 +47,6 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar, 
           <div className="flex items-center gap-2 mt-3.5">
             <Avatar name={displayName} size={28} />
             <span className="text-white text-[13px] font-[Proza_Libre]">{displayName}</span>
-            <span className="text-[#A1A1A1] text-[12px] ml-auto">★ {displayRating}</span>
           </div>
           <div className="flex gap-2 mt-4">
             <Link to="/profile/$userId" params={{ userId: project.captainId }} className="flex-1"><Button variant="ghost" full className="!text-[13px] !px-3 !py-2.5">View Profile</Button></Link>
@@ -80,7 +77,6 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar, 
         <div className="flex items-center gap-2 mt-4">
           <Avatar name={displayName} size={28} />
           <span className="text-white text-[13px] font-[Proza_Libre]">{displayName}</span>
-          <span className="text-[#A1A1A1] text-[12px] ml-auto">★ {displayRating}</span>
         </div>
         <Button full className="mt-4 !text-[14px]" onClick={() => setOpen(true)}>Connect →</Button>
       </div>
