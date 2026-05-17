@@ -25,7 +25,17 @@
 }
 
 * { border-color: #2A2A2A; }
-html, body { background: #000000; color: #FFFFFF; font-family: 'Proza Libre', sans-serif; }
+html, body { background: transparent; color: #FFFFFF; font-family: 'Proza Libre', sans-serif; }
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000000;
+  z-index: -1;
+}
 body, p, span, a, button, input, textarea, select, label, li, div { font-family: 'Proza Libre', sans-serif; }
 h1, h2, h3, h4, h5, h6 { font-family: 'Unbounded', sans-serif; }
 .font-unbounded, [class*="font-[Unbounded"] { font-family: 'Unbounded', sans-serif !important; }

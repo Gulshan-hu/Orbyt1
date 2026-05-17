@@ -33,7 +33,7 @@ function Index() {
   };
 
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="min-h-screen text-white" style={{ background: 'transparent' }}>
       <Navbar />
 
       {/* HERO */}
@@ -58,7 +58,7 @@ function Index() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="py-[120px] bg-black">
+      <section id="how-it-works" className="py-[120px]" style={{ background: 'transparent' }}>
         <h2 className="text-center text-white mb-16" style={{ fontSize: 36 }}>How it works</h2>
         <div className="grid md:grid-cols-3 gap-6 max-w-[1100px] mx-auto px-6">
           {[
@@ -78,7 +78,7 @@ function Index() {
       </section>
 
       {/* SKILL SHOWCASE */}
-      <section className="py-20 bg-black overflow-hidden">
+      <section className="py-20 overflow-hidden" style={{ background: 'transparent' }}>
         <h2 className="text-center text-white mb-12" style={{ fontSize: 32 }}>There's a place for every skill</h2>
         <div className="overflow-hidden mb-3">
           <div className="flex gap-3 w-max animate-marquee-left">
