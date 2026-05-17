@@ -9,7 +9,7 @@ import { ProjectDetailModal } from "@/components/ProjectDetailModal";
 import { EditProjectModal } from "@/components/EditProjectModal";
 import { CreateProjectModal } from "@/components/CreateProjectModal";
 import { ConnectModal } from "@/components/ConnectModal";
-import { fetchUser, fetchProjectsForUser, fetchConnectionsForUser, type OrbytUser, type OrbytProject } from "@/lib/data";
+import { fetchUser, fetchProjectsForUser, fetchConnectionsForUser, fetchFriendsForUser, type OrbytUser, type OrbytProject } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 
