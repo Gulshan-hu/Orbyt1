@@ -64,13 +64,22 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
     // Upload avatar if changed
     if (avatarFile) {
       const fileExt = avatarFile.name.split('.').pop();
-      const fileName = `${user.id}-${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
+
+      // Delete old avatar if exists
+      if (user.avatarUrl) {
+        const oldPath = user.avatarUrl.split('/avatars/')[1];
+        if (oldPath) {
+          await supabase.storage.from('avatars').remove([oldPath]);
+        }
+      }
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('avatars')
         .upload(fileName, avatarFile, { upsert: true });
 
       if (uploadError) {
-        show("Failed to upload avatar");
+        show("Failed to upload avatar: " + uploadError.message);
         return;
       }
 
