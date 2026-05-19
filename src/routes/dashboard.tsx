@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
@@ -124,7 +125,11 @@ function Dashboard() {
             {Array.from({ length: 3 }).map((_, i) => <div key={i} className="shimmer rounded-[16px] w-[300px] h-[280px] flex-shrink-0" />)}
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory">
             {recommendedProjects.map(p => {
               const captain = users.find(u => u.id === p.captainId);
               return (
@@ -137,12 +142,17 @@ function Dashboard() {
               );
             })}
             {recommendedUsers.map(u => <UserCard key={u.id} user={u} recommended />)}
-          </div>
+          </motion.div>
         )}
 
         {showProjects && (
           <>
-            <h2 className="text-white text-[18px] mt-12 mb-5">All projects</h2>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              className="text-white text-[18px] mt-12 mb-5">All projects</motion.h2>
             {loading ? (
               <div className="grid lg:grid-cols-2 gap-5">{Array.from({ length: 4 }).map((_, i) => <div key={i} className="shimmer rounded-[16px] h-[260px]" />)}</div>
             ) : filteredProjects.length === 0 ? (
@@ -166,7 +176,12 @@ function Dashboard() {
 
         {showUsers && (
           <>
-            <h2 className="text-white text-[18px] mt-12 mb-5">All users</h2>
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4 }}
+              className="text-white text-[18px] mt-12 mb-5">All users</motion.h2>
             <div className="grid lg:grid-cols-2 gap-5">{filteredUsers.map(u => <UserCard key={u.id} user={u} />)}</div>
           </>
         )}

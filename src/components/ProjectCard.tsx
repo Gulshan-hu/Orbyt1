@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { Avatar } from "./Avatar";
 import { Tag } from "./Tag";
 import { Button } from "./Button";
@@ -32,7 +33,12 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
   if (recommended) {
     return (
       <>
-        <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 w-[300px] flex-shrink-0 snap-start">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileHover={{ scale: 1.02, y: -4 }}
+          className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 w-[300px] flex-shrink-0 snap-start">
           <div className="flex justify-between">
             <StatusBadge status={project.status} />
             <span className="bg-[#2A2A2A] text-white rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]">⚡ {project.matchScore}% match</span>
@@ -52,7 +58,7 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
             <Link to="/profile/$userId" params={{ userId: project.captainId }} className="flex-1"><Button variant="ghost" full className="!text-[13px] !px-3 !py-2.5">View Profile</Button></Link>
             <Button full className="flex-1 !text-[13px] !px-3 !py-2.5" onClick={() => setOpen(true)}>Connect →</Button>
           </div>
-        </div>
+        </motion.div>
         <ConnectModal open={open} onClose={() => setOpen(false)} projectName={project.name} captainName={displayName} captainId={project.captainId} />
       </>
     );
@@ -60,7 +66,13 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
 
   return (
     <>
-      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 hover:border-[#E2E2E2] transition cursor-pointer">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.4 }}
+        whileHover={{ scale: 1.02, y: -4 }}
+        className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 hover:border-[#E2E2E2] transition cursor-pointer">
         <div className="flex justify-between items-start gap-3">
           <div className="flex items-center gap-2">
             <h3 className="text-white text-[17px]">{project.name}</h3>
@@ -79,7 +91,7 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
           <span className="text-white text-[13px] font-[Proza_Libre]">{displayName}</span>
         </div>
         <Button full className="mt-4 !text-[14px]" onClick={() => setOpen(true)}>Connect →</Button>
-      </div>
+      </motion.div>
       <ConnectModal open={open} onClose={() => setOpen(false)} projectName={project.name} captainName={displayName} captainId={project.captainId} />
     </>
   );

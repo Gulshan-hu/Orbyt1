@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import { Avatar } from "./Avatar";
 import { Tag } from "./Tag";
 import { Button } from "./Button";
@@ -13,7 +14,12 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
   if (recommended) {
     return (
       <>
-        <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 w-[300px] flex-shrink-0 snap-start">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          whileHover={{ scale: 1.02, y: -4 }}
+          className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 w-[300px] flex-shrink-0 snap-start">
           <div className="flex justify-between">
             <span className="bg-[#2A2A2A] text-[#E2E2E2] rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]">User</span>
             <span className="bg-[#2A2A2A] text-white rounded-[999px] px-3 py-1 text-[11px] font-[Proza_Libre]">⚡ {user.matchScore}% match</span>
@@ -31,7 +37,7 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
             <Link to="/profile/$userId" params={{ userId: user.id }} className="flex-1"><Button variant="ghost" full className="!text-[13px] !px-3 !py-2.5">View Profile</Button></Link>
             <Button full className="flex-1 !text-[13px] !px-3 !py-2.5" onClick={() => setOpen(true)}>Connect →</Button>
           </div>
-        </div>
+        </motion.div>
         <ConnectModal open={open} onClose={() => setOpen(false)} projectName={`a project with ${fullName}`} captainName={fullName} captainId={user.id} />
       </>
     );
@@ -39,7 +45,13 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
 
   return (
     <>
-      <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 hover:border-[#E2E2E2] transition">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-50px" }}
+        transition={{ duration: 0.4 }}
+        whileHover={{ scale: 1.02, y: -4 }}
+        className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 hover:border-[#E2E2E2] transition">
         <div className="flex items-center gap-3">
           <Avatar name={fullName} size={48} />
           <div className="min-w-0">
@@ -53,7 +65,7 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
           <Link to="/profile/$userId" params={{ userId: user.id }} className="flex-1"><Button variant="ghost" full>View Profile</Button></Link>
           <Button full onClick={() => setOpen(true)}>Connect</Button>
         </div>
-      </div>
+      </motion.div>
       <ConnectModal open={open} onClose={() => setOpen(false)} projectName={`a project with ${fullName}`} captainName={fullName} captainId={user.id} />
     </>
   );
