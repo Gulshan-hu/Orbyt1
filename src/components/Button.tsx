@@ -22,7 +22,7 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
         backgroundImage: variant === "primary" ? `url(${buttonPattern})` : undefined,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
-        textShadow: variant === "primary" ? '0 2px 4px rgba(0,0,0,0.8), 0 0 8px rgba(255,255,255,0.6)' : undefined,
+        textShadow: variant === "primary" ? '0 1px 2px rgba(0,0,0,0.3)' : undefined,
       }}
       {...rest}
     />
