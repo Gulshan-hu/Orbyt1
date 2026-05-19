@@ -1,5 +1,5 @@
 import { forwardRef, ButtonHTMLAttributes } from "react";
-import moonPattern from '@/assets/moon-pattern.png';
+import buttonPattern from '@/assets/button-pattern.png';
 
 type Variant = "primary" | "ghost" | "danger";
 interface Props extends ButtonHTMLAttributes<HTMLButtonElement> { variant?: Variant; full?: boolean; }
@@ -19,8 +19,8 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       ref={ref}
       className={`${base} ${v} ${full ? "w-full" : ""} ${className}`}
       style={{
-        backgroundImage: variant === "primary" ? `url(${moonPattern})` : undefined,
-        backgroundSize: '200%',
+        backgroundImage: variant === "primary" ? `url(${buttonPattern})` : undefined,
+        backgroundSize: 'cover',
         backgroundPosition: 'center',
         textShadow: variant === "primary" ? '0 1px 2px rgba(255,255,255,0.8)' : undefined,
       }}
