@@ -42,6 +42,8 @@ export function Navbar() {
             </>
           )}
         </nav>
+
+        <button className="md:hidden text-white p-2" onClick={() => setOpen(!open)} aria-label="Menu">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             {open ? <path d="M6 6l12 12M6 18L18 6"/> : <><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></>}
           </svg>
