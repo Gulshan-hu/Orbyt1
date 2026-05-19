@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { ToastProvider } from "@/components/Toast";
 import { NotificationsProvider } from "@/lib/notifications";
 import { FloatingParticlesBackground } from "@/components/FloatingParticlesBackground";
+import { MoonDecoration } from "@/components/MoonDecoration";
 
 function NotFoundComponent() {
   return (
@@ -125,7 +126,8 @@ function RootComponent() {
       <FloatingParticlesBackground />
       <ToastProvider>
         <NotificationsProvider>
-          <div style={{ position: 'relative', zIndex: 1 }}>
+          <MoonDecoration />
+          <div style={{ position: 'relative', zIndex: 10 }}>
             <Outlet />
           </div>
         </NotificationsProvider>
