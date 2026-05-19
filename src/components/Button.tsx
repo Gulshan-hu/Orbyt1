@@ -20,8 +20,9 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       className={`${base} ${v} ${full ? "w-full" : ""} ${className}`}
       style={{
         backgroundImage: variant === "primary" ? `url(${moonPattern})` : undefined,
-        backgroundSize: 'cover',
+        backgroundSize: '200%',
         backgroundPosition: 'center',
+        textShadow: variant === "primary" ? '0 1px 2px rgba(255,255,255,0.8)' : undefined,
       }}
       {...rest}
     />
