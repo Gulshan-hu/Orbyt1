@@ -93,9 +93,9 @@ function Index() {
       </section>
 
       {/* FOOTER */}
-      <footer className="bg-[#0A0A0A] border-t border-[#2A2A2A] py-10 px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
-        <div className="flex items-center gap-4 text-white"><Logo height={24} /><span className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">© 2025 Orbyt</span></div>
-        <div className="flex gap-6 text-[13px] font-[Proza_Libre]">
+      <footer className="bg-[#0A0A0A] border-t border-[#2A2A2A] py-6 px-6 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div className="flex items-center gap-3 text-white"><Logo height={20} /><span className="text-[#A1A1A1] text-[12px] font-[Proza_Libre]">© 2026 Orbyt</span></div>
+        <div className="flex gap-5 text-[12px] font-[Proza_Libre]">
           {["About","Terms","Privacy"].map(l => <a key={l} href="#" className="text-[#A1A1A1] hover:text-white transition">{l}</a>)}
         </div>
       </footer>
