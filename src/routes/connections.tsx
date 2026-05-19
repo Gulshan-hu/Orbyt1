@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import { DashboardLayout } from "@/components/DashboardLayout";
 import { Avatar } from "@/components/Avatar";
 import { Tag } from "@/components/Tag";
@@ -80,12 +81,18 @@ function ConnectionsPage() {
             <p className="text-[#A1A1A1] font-[Proza_Libre]">No connections yet.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {connections.map(c => {
+              {connections.map((c, index) => {
                 const n = `${c.firstName} ${c.lastName}`;
                 const sharedProject = projects.find(p => p.memberIds.includes(c.id) && user && p.memberIds.includes(user.id))?.name || projects[0]?.name || "Shared";
                 const needsRating = !rated.has(c.id);
                 return (
-                  <div key={c.id} className={`bg-[#1A1A1A] rounded-[16px] p-6 border ${needsRating ? "border-[#E2E2E2]" : "border-[#2A2A2A]"}`}>
+                  <motion.div
+                    key={c.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    className={`bg-[#1A1A1A] rounded-[16px] p-6 border ${needsRating ? "border-[#E2E2E2]" : "border-[#2A2A2A]"}`}>
                     <div className="flex items-center gap-3">
                       <Avatar name={n} size={48} avatarUrl={c.avatarUrl} />
                       <div className="min-w-0">
@@ -99,7 +106,7 @@ function ConnectionsPage() {
                       <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: c.id } })}>Profile</Button>
                       <Button full onClick={() => setRateFor(c.id)}>{needsRating ? "Rate" : "Rated ✓"}</Button>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -122,10 +129,16 @@ function ConnectionsPage() {
             </div>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {friends.map(f => {
+              {friends.map((f, index) => {
                 const n = `${f.firstName} ${f.lastName}`;
                 return (
-                  <div key={f.id} className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A] hover:border-[#E2E2E2] transition">
+                  <motion.div
+                    key={f.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                    className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A] hover:border-[#E2E2E2] transition">
                     <div className="flex items-center gap-3">
                       <Avatar name={n} size={48} avatarUrl={f.avatarUrl} />
                       <div className="min-w-0">
@@ -141,7 +154,7 @@ function ConnectionsPage() {
                     <div className="mt-4">
                       <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: f.id } })}>View Profile</Button>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
@@ -152,11 +165,17 @@ function ConnectionsPage() {
       {tab === "Pending Requests" && (
         <div className="flex flex-col gap-4">
           {pending.length === 0 && <p className="text-[#A1A1A1] font-[Proza_Libre]">No pending requests.</p>}
-          {pending.map(req => {
+          {pending.map((req, index) => {
             const u = req.fromUser;
             const n = `${u.firstName} ${u.lastName}`;
             return (
-              <div key={req.id} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 flex flex-col md:flex-row gap-4 md:items-center">
+              <motion.div
+                key={req.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.4, delay: index * 0.1 }}
+                whileHover={{ scale: 1.01 }}
+                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 flex flex-col md:flex-row gap-4 md:items-center">
                 <Avatar name={n} size={52} />
                 <div className="flex-1 min-w-0">
                   <div className="text-white text-[15px] font-[Unbounded]">{n}</div>
@@ -170,7 +189,7 @@ function ConnectionsPage() {
                   <Button onClick={() => handleAccept(req)}>Accept</Button>
                   <Button variant="ghost" onClick={() => handleDecline(req.id)}>Decline</Button>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
