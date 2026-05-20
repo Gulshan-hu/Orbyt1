@@ -26,8 +26,8 @@ export function ProjectReviewModal({ open, onClose, projectId, projectName, revi
     try {
       await submitProjectReview(projectId, reviewerId, reviewText.trim());
       show("Review submitted successfully!");
-      onClose();
       setReviewText("");
+      onClose();
     } catch (error: any) {
       if (error.message?.includes("duplicate")) {
         show("You've already reviewed this project");

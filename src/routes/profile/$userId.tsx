@@ -128,7 +128,8 @@ function ProfilePage() {
                 )}
                 {projects.length === 0 && <p className="text-[#A1A1A1] font-[Proza_Libre]">No projects yet.</p>}
                 {projects.map(p => {
-                  const role = p.captainId === user.id ? "Captain" : "Member";
+                  const isCaptain = p.captainId === user.id;
+                  const role = isCaptain ? "Captain" : "Team Member";
                   return (
                     <div key={p.id} className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6">
                       <div className="flex justify-between items-start gap-3">
@@ -146,7 +147,7 @@ function ProfilePage() {
                       <div className="flex flex-wrap gap-1.5 mt-3">{p.skillsHave.slice(0,5).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
                       <div className="mt-4 flex gap-2">
                         <Button variant="ghost" onClick={() => setDetailProject(p)}>View project →</Button>
-                        {isOwn && p.captainId === user.id && <Button variant="ghost" onClick={() => setEditProject(p)}>Edit project</Button>}
+                        {isOwn && isCaptain && <Button variant="ghost" onClick={() => setEditProject(p)}>Edit project</Button>}
                       </div>
                     </div>
                   );

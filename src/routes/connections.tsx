@@ -5,14 +5,13 @@ import { DashboardLayout } from "@/components/DashboardLayout";
 import { Avatar } from "@/components/Avatar";
 import { Tag } from "@/components/Tag";
 import { Button } from "@/components/Button";
-import { RatingModal } from "@/components/RatingModal";
 import { useToast } from "@/components/Toast";
-import { fetchConnectionsForUser, fetchPendingRequests, acceptConnectionRequest, rejectConnectionRequest, fetchAllProjects, fetchFriendsForUser, type OrbytUser, type OrbytPendingRequest } from "@/lib/data";
+import { fetchConnectionsForUser, fetchPendingRequests, acceptConnectionRequest, rejectConnectionRequest, fetchAllProjects, type OrbytUser, type OrbytPendingRequest } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/connections")({ component: ConnectionsPage });
 
-const TABS = ["My Connections","Friends","Pending Requests"] as const;
+const TABS = ["My Connections","Pending Requests"] as const;
 
 function ConnectionsPage() {
   const navigate = useNavigate();
@@ -21,24 +20,19 @@ function ConnectionsPage() {
   const [tab, setTab] = useState<typeof TABS[number]>("My Connections");
   const [pending, setPending] = useState<OrbytPendingRequest[]>([]);
   const [connections, setConnections] = useState<OrbytUser[]>([]);
-  const [friends, setFriends] = useState<OrbytUser[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
-  const [rateFor, setRateFor] = useState<string | null>(null);
-  const [rated, setRated] = useState<Set<string>>(new Set());
 
   useEffect(() => { if (!authLoading && !user) navigate({ to: "/login" }); }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
     const load = async () => {
-      const [conns, friendsList, reqs, projs] = await Promise.all([
+      const [conns, reqs, projs] = await Promise.all([
         fetchConnectionsForUser(user.id),
-        fetchFriendsForUser(user.id),
         fetchPendingRequests(user.id),
         fetchAllProjects(),
       ]);
       setConnections(conns);
-      setFriends(friendsList);
       setPending(reqs);
       setProjects(projs);
     };
@@ -61,7 +55,7 @@ function ConnectionsPage() {
   return (
     <DashboardLayout>
       <h1 className="text-white text-[28px] mb-2">My Network</h1>
-      <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">{connections.length} connections • {friends.length} friends</p>
+      <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">{connections.length} connections</p>
 
       <div className="flex gap-7 border-b border-[#2A2A2A] mb-8">
         {TABS.map(t => (
@@ -84,7 +78,6 @@ function ConnectionsPage() {
               {connections.map((c, index) => {
                 const n = `${c.firstName} ${c.lastName}`;
                 const sharedProject = projects.find(p => p.memberIds.includes(c.id) && user && p.memberIds.includes(user.id))?.name || projects[0]?.name || "Shared";
-                const needsRating = !rated.has(c.id);
                 return (
                   <motion.div
                     key={c.id}
@@ -92,7 +85,7 @@ function ConnectionsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     whileHover={{ scale: 1.02, y: -4 }}
-                    className={`bg-[#1A1A1A] rounded-[16px] p-6 border ${needsRating ? "border-[#E2E2E2]" : "border-[#2A2A2A]"}`}>
+                    className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A]">
                     <div className="flex items-center gap-3">
                       <Avatar name={n} size={48} avatarUrl={c.avatarUrl} />
                       <div className="min-w-0">
@@ -102,57 +95,8 @@ function ConnectionsPage() {
                     </div>
                     <p className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] mt-3">Project: <span className="text-white">{sharedProject}</span></p>
                     <div className="flex flex-wrap gap-1.5 mt-3">{c.skills.slice(0,4).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
-                    <div className="flex gap-2 mt-4">
-                      <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: c.id } })}>Profile</Button>
-                      <Button full onClick={() => setRateFor(c.id)}>{needsRating ? "Rate" : "Rated ✓"}</Button>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      {tab === "Friends" && (
-        <div>
-          <p className="text-[#A1A1A1] text-[13px] font-[Proza_Libre] mb-4">
-            People who became friends by collaborating on the same project
-          </p>
-          {friends.length === 0 ? (
-            <div className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-12 text-center">
-              <div className="text-6xl mb-4">👥</div>
-              <h3 className="text-white text-[18px] mb-2">No friends yet</h3>
-              <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
-                When you collaborate with others on projects, you'll automatically become friends
-              </p>
-            </div>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {friends.map((f, index) => {
-                const n = `${f.firstName} ${f.lastName}`;
-                return (
-                  <motion.div
-                    key={f.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.4, delay: index * 0.1 }}
-                    whileHover={{ scale: 1.02, y: -4 }}
-                    className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A] hover:border-[#E2E2E2] transition">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={n} size={48} avatarUrl={f.avatarUrl} />
-                      <div className="min-w-0">
-                        <div className="text-white text-[15px] font-[Unbounded] truncate">{n}</div>
-                        <div className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] truncate">{f.university}</div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 mt-3">
-                      <span className="text-[#A1A1A1] text-[12px] font-[Proza_Libre]">Project collaborator</span>
-                      <span className="text-green-500">✓</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1.5 mt-3">{f.skills.slice(0,4).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
                     <div className="mt-4">
-                      <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: f.id } })}>View Profile</Button>
+                      <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: c.id } })}>View Profile</Button>
                     </div>
                   </motion.div>
                 );
@@ -194,22 +138,6 @@ function ConnectionsPage() {
           })}
         </div>
       )}
-
-      {rateFor && (() => {
-        const u = connections.find(c => c.id === rateFor);
-        if (!u) return null;
-        return (
-          <RatingModal
-            open
-            onClose={() => setRateFor(null)}
-            name={`${u.firstName} ${u.lastName}`}
-            projectName={projects[0]?.name || "Shared"}
-            toUserId={u.id}
-            projectId={projects[0]?.id}
-            onSubmit={() => setRated(new Set([...rated, rateFor]))}
-          />
-        );
-      })()}
     </DashboardLayout>
   );
 }

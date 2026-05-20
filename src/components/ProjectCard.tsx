@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { Avatar } from "./Avatar";
 import { Tag } from "./Tag";
 import { Button } from "./Button";
-import { ConnectModal } from "./ConnectModal";
+import { JoinProjectModal } from "./JoinProjectModal";
 import { type OrbytProject } from "@/lib/data";
 
 function StatusBadge({ status }: { status: 'looking_for_team' | 'in_progress' | 'done' }) {
@@ -56,10 +56,10 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
           </div>
           <div className="flex gap-2 mt-4">
             <Link to="/profile/$userId" params={{ userId: project.captainId }} className="flex-1"><Button variant="ghost" full className="!text-[13px] !px-3 !py-2.5">View Profile</Button></Link>
-            <Button full className="flex-1 !text-[13px] !px-3 !py-2.5" onClick={() => setOpen(true)}>Connect →</Button>
+            <Button full className="flex-1 !text-[13px] !px-3 !py-2.5" onClick={() => setOpen(true)}>Join →</Button>
           </div>
         </motion.div>
-        <ConnectModal open={open} onClose={() => setOpen(false)} projectName={project.name} captainName={displayName} captainId={project.captainId} />
+        <JoinProjectModal open={open} onClose={() => setOpen(false)} projectName={project.name} projectId={project.id} captainId={project.captainId} skillsNeeded={project.skillsNeed} />
       </>
     );
   }
@@ -90,9 +90,9 @@ export function ProjectCard({ project, recommended, captainName, captainAvatar }
           <Avatar name={displayName} size={28} />
           <span className="text-white text-[13px] font-[Proza_Libre]">{displayName}</span>
         </div>
-        <Button full className="mt-4 !text-[14px]" onClick={() => setOpen(true)}>Connect →</Button>
+        <Button full className="mt-4 !text-[14px]" onClick={() => setOpen(true)}>Join</Button>
       </motion.div>
-      <ConnectModal open={open} onClose={() => setOpen(false)} projectName={project.name} captainName={displayName} captainId={project.captainId} />
+      <JoinProjectModal open={open} onClose={() => setOpen(false)} projectName={project.name} projectId={project.id} captainId={project.captainId} skillsNeeded={project.skillsNeed} />
     </>
   );
 }
