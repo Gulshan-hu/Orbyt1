@@ -57,7 +57,7 @@ function Dashboard() {
   }, [user]);
 
   const recommendedProjects = useMemo(() =>
-    projects.slice().sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0)).slice(0, 4),
+    projects.filter(p => p.status !== 'done').slice().sort((a, b) => (b.matchScore || 0) - (a.matchScore || 0)).slice(0, 4),
     [projects]
   );
 

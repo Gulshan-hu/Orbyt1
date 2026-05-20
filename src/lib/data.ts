@@ -512,11 +512,16 @@ export async function fetchProjectReviews(projectId: string): Promise<OrbytProje
 
 export async function fetchCompletedProjects(): Promise<OrbytProject[]> {
   const [{ data: rows }, members, ps] = await Promise.all([
-    supabase.from("projects").select("*").eq("status", "done").order("created_at", { ascending: false }),
+    supabase.from("projects").select("*").eq("status", "done").eq("in_showcase", true).order("created_at", { ascending: false }),
     loadProjectMembers(),
     loadProjectSkills(),
   ]);
   return (rows ?? []).map(r => rowToProject(r, ps.have.get(r.id) ?? [], ps.need.get(r.id) ?? [], members.byProject.get(r.id) ?? []));
+}
+
+export async function addProjectToShowcase(projectId: string) {
+  const { error } = await supabase.from("projects").update({ in_showcase: true }).eq("id", projectId);
+  if (error) throw error;
 }
 
 // ---------- Matching ----------

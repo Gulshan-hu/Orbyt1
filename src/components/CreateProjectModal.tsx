@@ -3,7 +3,7 @@ import { Modal } from "./Modal";
 import { Button } from "./Button";
 import { Input, Textarea, FieldLabel } from "./Input";
 import { SkillPicker } from "./SkillPicker";
-import { createProjectWithSkills } from "@/lib/data";
+import { createProjectWithSkills, fetchConnectionsForUser, sendConnectionRequest } from "@/lib/data";
 import { useToast } from "./Toast";
 
 export function CreateProjectModal({ open, onClose, captainId, onCreated }: {
@@ -26,7 +26,7 @@ export function CreateProjectModal({ open, onClose, captainId, onCreated }: {
       return;
     }
 
-    await createProjectWithSkills({
+    const projectId = await createProjectWithSkills({
       captainId,
       name: name.trim(),
       description: description.trim(),
@@ -34,6 +34,23 @@ export function CreateProjectModal({ open, onClose, captainId, onCreated }: {
       have,
       need,
     });
+
+    // Send notifications to all connections about the new project
+    try {
+      const connections = await fetchConnectionsForUser(captainId);
+      await Promise.all(
+        connections.map(conn =>
+          sendConnectionRequest({
+            fromUserId: captainId,
+            toUserId: conn.id,
+            projectId: projectId,
+            message: `I just created a new project: ${name.trim()}`,
+          })
+        )
+      );
+    } catch (error) {
+      console.error("Failed to notify connections:", error);
+    }
 
     show("Project created successfully");
     onCreated();
