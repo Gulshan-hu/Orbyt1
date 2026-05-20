@@ -22,11 +22,15 @@ export function UserCard({ user, recommended }: { user: OrbytUser; recommended?:
         fromUserId: currentUser.id,
         toUserId: user.id,
         projectId: null,
-        message: undefined,
       });
       show("Connection request sent!");
-    } catch (error) {
-      show("Failed to send request");
+    } catch (error: any) {
+      console.error("Connection request error:", error);
+      if (error?.message?.includes("duplicate") || error?.code === "23505") {
+        show("Connection request already sent");
+      } else {
+        show("Failed to send request");
+      }
     } finally {
       setSending(false);
     }
