@@ -6,7 +6,14 @@ import { sendConnectionRequest } from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "./Toast";
 
-export function JoinProjectModal({ open, onClose, projectName, projectId, captainId, skillsNeeded }: {
+export function JoinProjectModal({
+  open,
+  onClose,
+  projectName,
+  projectId,
+  captainId,
+  skillsNeeded,
+}: {
   open: boolean;
   onClose: () => void;
   projectName: string;
@@ -65,21 +72,25 @@ export function JoinProjectModal({ open, onClose, projectName, projectId, captai
               }`}
             >
               <div className="flex items-center gap-2 mb-1">
-                <Tag small static>{item.skill}</Tag>
+                <Tag small static>
+                  {item.skill}
+                </Tag>
                 {selectedSkill === item.skill && <span className="text-white">✓</span>}
               </div>
               {item.note && (
-                <p className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] mt-2">
-                  {item.note}
-                </p>
+                <p className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] mt-2">{item.note}</p>
               )}
             </button>
           ))}
         </div>
       )}
       <div className="flex gap-2 mt-6">
-        <Button variant="ghost" full onClick={onClose}>Cancel</Button>
-        <Button full onClick={handleSend} disabled={!selectedSkill || skillsNeeded.length === 0}>Send Request</Button>
+        <Button variant="ghost" full onClick={onClose}>
+          Cancel
+        </Button>
+        <Button full onClick={handleSend} disabled={!selectedSkill || skillsNeeded.length === 0}>
+          Send Request
+        </Button>
       </div>
     </Modal>
   );

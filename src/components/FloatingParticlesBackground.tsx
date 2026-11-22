@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef } from "react";
 
 interface Particle {
   x: number;
@@ -20,9 +20,9 @@ const CONFIG = {
   glowIntensity: 12,
   movementSpeed: 0.2,
   mouseInfluence: 120,
-  backgroundColor: 'transparent',
-  particleColor: '#ffffff',
-  mouseGravity: 'attract' as const,
+  backgroundColor: "transparent",
+  particleColor: "#ffffff",
+  mouseGravity: "attract" as const,
   gravityStrength: 80,
 };
 
@@ -36,7 +36,7 @@ export function FloatingParticlesBackground() {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
     const resizeCanvas = () => {
@@ -148,14 +148,14 @@ export function FloatingParticlesBackground() {
     initParticles();
     animate();
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener("mousemove", handleMouseMove);
     resizeObserver.observe(canvas);
 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener("mousemove", handleMouseMove);
       resizeObserver.disconnect();
     };
   }, []);
@@ -195,13 +195,13 @@ export function FloatingParticlesBackground() {
     <canvas
       ref={canvasRef}
       style={{
-        position: 'fixed',
+        position: "fixed",
         top: 0,
         left: 0,
-        width: '100vw',
-        height: '100vh',
+        width: "100vw",
+        height: "100vh",
         zIndex: 0,
-        pointerEvents: 'none',
+        pointerEvents: "none",
       }}
     />
   );

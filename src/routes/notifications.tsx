@@ -18,18 +18,18 @@ function NotificationsPage() {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'connect_request_received':
-        return '👋';
-      case 'connect_request_accepted':
-        return '✅';
-      case 'friend_new_project':
-        return '🚀';
-      case 'project_invite':
-        return '📨';
-      case 'project_status_change':
-        return '📊';
+      case "connect_request_received":
+        return "👋";
+      case "connect_request_accepted":
+        return "✅";
+      case "friend_new_project":
+        return "🚀";
+      case "project_invite":
+        return "📨";
+      case "project_status_change":
+        return "📊";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
@@ -40,8 +40,8 @@ function NotificationsPage() {
     }
   };
 
-  const unreadNotifications = notifications.filter(n => !n.read);
-  const readNotifications = notifications.filter(n => n.read);
+  const unreadNotifications = notifications.filter((n) => !n.read);
+  const readNotifications = notifications.filter((n) => n.read);
 
   return (
     <DashboardLayout>
@@ -78,14 +78,16 @@ function NotificationsPage() {
               <div>
                 <h2 className="text-white text-[16px] font-[Proza_Libre] mb-3">New</h2>
                 <div className="flex flex-col gap-2">
-                  {unreadNotifications.map(notification => (
+                  {unreadNotifications.map((notification) => (
                     <button
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
                       className="w-full text-left bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-5 hover:border-[#E2E2E2] transition"
                     >
                       <div className="flex gap-4">
-                        <div className="text-3xl flex-shrink-0">{getNotificationIcon(notification.type)}</div>
+                        <div className="text-3xl flex-shrink-0">
+                          {getNotificationIcon(notification.type)}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between gap-2 mb-1">
                             <h3 className="text-white text-[16px] font-[Proza_Libre] font-medium">
@@ -111,14 +113,16 @@ function NotificationsPage() {
               <div>
                 <h2 className="text-white text-[16px] font-[Proza_Libre] mb-3">Earlier</h2>
                 <div className="flex flex-col gap-2">
-                  {readNotifications.map(notification => (
+                  {readNotifications.map((notification) => (
                     <button
                       key={notification.id}
                       onClick={() => handleNotificationClick(notification)}
                       className="w-full text-left bg-[#0A0A0A] border border-[#2A2A2A] rounded-[16px] p-5 hover:border-[#E2E2E2] transition"
                     >
                       <div className="flex gap-4">
-                        <div className="text-3xl flex-shrink-0 opacity-50">{getNotificationIcon(notification.type)}</div>
+                        <div className="text-3xl flex-shrink-0 opacity-50">
+                          {getNotificationIcon(notification.type)}
+                        </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-[#A1A1A1] text-[16px] font-[Proza_Libre] font-medium mb-1">
                             {notification.title}

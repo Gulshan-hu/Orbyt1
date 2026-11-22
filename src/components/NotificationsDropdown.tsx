@@ -18,18 +18,18 @@ export function NotificationsDropdown() {
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
-      case 'connect_request_received':
-        return '👋';
-      case 'connect_request_accepted':
-        return '✅';
-      case 'friend_new_project':
-        return '🚀';
-      case 'project_invite':
-        return '📨';
-      case 'project_status_change':
-        return '📊';
+      case "connect_request_received":
+        return "👋";
+      case "connect_request_accepted":
+        return "✅";
+      case "friend_new_project":
+        return "🚀";
+      case "project_invite":
+        return "📨";
+      case "project_status_change":
+        return "📊";
       default:
-        return '🔔';
+        return "🔔";
     }
   };
 
@@ -39,13 +39,22 @@ export function NotificationsDropdown() {
         onClick={() => setOpen(!open)}
         className="relative p-2 text-[#A1A1A1] hover:text-white transition rounded-lg hover:bg-[#1A1A1A]"
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
           <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unreadCount > 0 && (
           <span className="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
+            {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}
       </button>
@@ -70,19 +79,23 @@ export function NotificationsDropdown() {
               {notifications.length === 0 ? (
                 <div className="p-8 text-center">
                   <div className="text-4xl mb-3">🔔</div>
-                  <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre]">No notifications yet</p>
+                  <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre]">
+                    No notifications yet
+                  </p>
                 </div>
               ) : (
-                notifications.map(notification => (
+                notifications.map((notification) => (
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
                     className={`w-full text-left p-4 border-b border-[#2A2A2A] hover:bg-[#1A1A1A] transition ${
-                      !notification.read ? 'bg-[#1A1A1A]/50' : ''
+                      !notification.read ? "bg-[#1A1A1A]/50" : ""
                     }`}
                   >
                     <div className="flex gap-3">
-                      <div className="text-2xl flex-shrink-0">{getNotificationIcon(notification.type)}</div>
+                      <div className="text-2xl flex-shrink-0">
+                        {getNotificationIcon(notification.type)}
+                      </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <h4 className="text-white text-[14px] font-[Proza_Libre] font-medium">

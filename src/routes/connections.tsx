@@ -6,23 +6,33 @@ import { Avatar } from "@/components/Avatar";
 import { Tag } from "@/components/Tag";
 import { Button } from "@/components/Button";
 import { useToast } from "@/components/Toast";
-import { fetchConnectionsForUser, fetchPendingRequests, acceptConnectionRequest, rejectConnectionRequest, fetchAllProjects, type OrbytUser, type OrbytPendingRequest } from "@/lib/data";
+import {
+  fetchConnectionsForUser,
+  fetchPendingRequests,
+  acceptConnectionRequest,
+  rejectConnectionRequest,
+  fetchAllProjects,
+  type OrbytUser,
+  type OrbytPendingRequest,
+} from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 
 export const Route = createFileRoute("/connections")({ component: ConnectionsPage });
 
-const TABS = ["My Connections","Pending Requests"] as const;
+const TABS = ["My Connections", "Pending Requests"] as const;
 
 function ConnectionsPage() {
   const navigate = useNavigate();
   const { show } = useToast();
   const { user, loading: authLoading } = useAuth();
-  const [tab, setTab] = useState<typeof TABS[number]>("My Connections");
+  const [tab, setTab] = useState<(typeof TABS)[number]>("My Connections");
   const [pending, setPending] = useState<OrbytPendingRequest[]>([]);
   const [connections, setConnections] = useState<OrbytUser[]>([]);
   const [projects, setProjects] = useState<any[]>([]);
 
-  useEffect(() => { if (!authLoading && !user) navigate({ to: "/login" }); }, [user, authLoading, navigate]);
+  useEffect(() => {
+    if (!authLoading && !user) navigate({ to: "/login" });
+  }, [user, authLoading, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -42,26 +52,36 @@ function ConnectionsPage() {
   const handleAccept = async (req: OrbytPendingRequest) => {
     await acceptConnectionRequest(req.id, req.fromUser.id, user!.id, req.projectId);
     setConnections([...connections, req.fromUser]);
-    setPending(pending.filter(p => p.id !== req.id));
+    setPending(pending.filter((p) => p.id !== req.id));
     show("Connection accepted!");
   };
 
   const handleDecline = async (reqId: string) => {
     await rejectConnectionRequest(reqId);
-    setPending(pending.filter(p => p.id !== reqId));
+    setPending(pending.filter((p) => p.id !== reqId));
     show("Request declined");
   };
 
   return (
     <DashboardLayout>
       <h1 className="text-white text-[28px] mb-2">My Network</h1>
-      <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">{connections.length} connections</p>
+      <p className="text-[#A1A1A1] text-[15px] font-[Proza_Libre] mb-8">
+        {connections.length} connections
+      </p>
 
       <div className="flex gap-7 border-b border-[#2A2A2A] mb-8">
-        {TABS.map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`pb-3 text-[15px] font-[Proza_Libre] border-b-2 transition ${tab === t ? "border-white text-white" : "border-transparent text-[#A1A1A1] hover:text-white"}`}>
-            {t}{t === "Pending Requests" && pending.length > 0 && <span className="ml-1.5 text-[12px] bg-[#2A2A2A] rounded-full px-2 py-0.5">{pending.length}</span>}
+        {TABS.map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`pb-3 text-[15px] font-[Proza_Libre] border-b-2 transition ${tab === t ? "border-white text-white" : "border-transparent text-[#A1A1A1] hover:text-white"}`}
+          >
+            {t}
+            {t === "Pending Requests" && pending.length > 0 && (
+              <span className="ml-1.5 text-[12px] bg-[#2A2A2A] rounded-full px-2 py-0.5">
+                {pending.length}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -77,7 +97,12 @@ function ConnectionsPage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {connections.map((c, index) => {
                 const n = `${c.firstName} ${c.lastName}`;
-                const sharedProject = projects.find(p => p.memberIds.includes(c.id) && user && p.memberIds.includes(user.id))?.name || projects[0]?.name || "Shared";
+                const sharedProject =
+                  projects.find(
+                    (p) => p.memberIds.includes(c.id) && user && p.memberIds.includes(user.id),
+                  )?.name ||
+                  projects[0]?.name ||
+                  "Shared";
                 return (
                   <motion.div
                     key={c.id}
@@ -85,18 +110,37 @@ function ConnectionsPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                     whileHover={{ scale: 1.02, y: -4 }}
-                    className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A]">
+                    className="bg-[#1A1A1A] rounded-[16px] p-6 border border-[#2A2A2A]"
+                  >
                     <div className="flex items-center gap-3">
                       <Avatar name={n} size={48} avatarUrl={c.avatarUrl} />
                       <div className="min-w-0">
                         <div className="text-white text-[15px] font-[Unbounded] truncate">{n}</div>
-                        <div className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] truncate">{c.university}</div>
+                        <div className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] truncate">
+                          {c.university}
+                        </div>
                       </div>
                     </div>
-                    <p className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] mt-3">Project: <span className="text-white">{sharedProject}</span></p>
-                    <div className="flex flex-wrap gap-1.5 mt-3">{c.skills.slice(0,4).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
+                    <p className="text-[#A1A1A1] text-[12px] font-[Proza_Libre] mt-3">
+                      Project: <span className="text-white">{sharedProject}</span>
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {c.skills.slice(0, 4).map((s) => (
+                        <Tag key={s} small static>
+                          {s}
+                        </Tag>
+                      ))}
+                    </div>
                     <div className="mt-4">
-                      <Button variant="ghost" full onClick={() => navigate({ to: "/profile/$userId", params: { userId: c.id } })}>View Profile</Button>
+                      <Button
+                        variant="ghost"
+                        full
+                        onClick={() =>
+                          navigate({ to: "/profile/$userId", params: { userId: c.id } })
+                        }
+                      >
+                        View Profile
+                      </Button>
                     </div>
                   </motion.div>
                 );
@@ -108,7 +152,9 @@ function ConnectionsPage() {
 
       {tab === "Pending Requests" && (
         <div className="flex flex-col gap-4">
-          {pending.length === 0 && <p className="text-[#A1A1A1] font-[Proza_Libre]">No pending requests.</p>}
+          {pending.length === 0 && (
+            <p className="text-[#A1A1A1] font-[Proza_Libre]">No pending requests.</p>
+          )}
           {pending.map((req, index) => {
             const u = req.fromUser;
             const n = `${u.firstName} ${u.lastName}`;
@@ -119,19 +165,32 @@ function ConnectionsPage() {
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.4, delay: index * 0.1 }}
                 whileHover={{ scale: 1.01 }}
-                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 flex flex-col md:flex-row gap-4 md:items-center">
+                className="bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-6 flex flex-col md:flex-row gap-4 md:items-center"
+              >
                 <Avatar name={n} size={52} />
                 <div className="flex-1 min-w-0">
                   <div className="text-white text-[15px] font-[Unbounded]">{n}</div>
                   <div className="text-[#A1A1A1] text-[13px] font-[Proza_Libre]">
                     wants to collaborate{req.projectName ? ` on ${req.projectName}` : ""}
                   </div>
-                  <div className="flex flex-wrap gap-1.5 mt-2">{u.skills.slice(0,4).map(s => <Tag key={s} small static>{s}</Tag>)}</div>
-                  {req.message && <p className="text-[#A1A1A1] text-[13px] font-[Proza_Libre] mt-3 italic">"{req.message}"</p>}
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {u.skills.slice(0, 4).map((s) => (
+                      <Tag key={s} small static>
+                        {s}
+                      </Tag>
+                    ))}
+                  </div>
+                  {req.message && (
+                    <p className="text-[#A1A1A1] text-[13px] font-[Proza_Libre] mt-3 italic">
+                      "{req.message}"
+                    </p>
+                  )}
                 </div>
                 <div className="flex gap-2 md:flex-col">
                   <Button onClick={() => handleAccept(req)}>Accept</Button>
-                  <Button variant="ghost" onClick={() => handleDecline(req.id)}>Decline</Button>
+                  <Button variant="ghost" onClick={() => handleDecline(req.id)}>
+                    Decline
+                  </Button>
                 </div>
               </motion.div>
             );

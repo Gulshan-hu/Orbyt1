@@ -5,7 +5,14 @@ import { ProjectCard } from "@/components/ProjectCard";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { ProjectReviewModal } from "@/components/ProjectReviewModal";
-import { fetchCompletedProjects, fetchProjectsForUser, addProjectToShowcase, fetchProjectReviews, type OrbytProject, type OrbytProjectReview } from "@/lib/data";
+import {
+  fetchCompletedProjects,
+  fetchProjectsForUser,
+  addProjectToShowcase,
+  fetchProjectReviews,
+  type OrbytProject,
+  type OrbytProjectReview,
+} from "@/lib/data";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/components/Toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,7 +37,7 @@ function Showcase() {
     setProjects(completed);
     if (user) {
       const myProjects = await fetchProjectsForUser(user.id);
-      const done = myProjects.filter(p => p.status === 'done' && p.captainId === user.id);
+      const done = myProjects.filter((p) => p.status === "done" && p.captainId === user.id);
       setMyDoneProjects(done);
     }
     setLoading(false);
@@ -45,18 +52,22 @@ function Showcase() {
 
     // Set up real-time subscription for project reviews
     const channel = supabase
-      .channel('project-reviews')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'project_reviews',
-      }, async (payload) => {
-        const projectId = payload.new.project_id;
-        if (projectId) {
-          const reviews = await fetchProjectReviews(projectId);
-          setProjectReviews(prev => ({ ...prev, [projectId]: reviews }));
-        }
-      })
+      .channel("project-reviews")
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "project_reviews",
+        },
+        async (payload) => {
+          const projectId = payload.new.project_id;
+          if (projectId) {
+            const reviews = await fetchProjectReviews(projectId);
+            setProjectReviews((prev) => ({ ...prev, [projectId]: reviews }));
+          }
+        },
+      )
       .subscribe();
 
     return () => {
@@ -64,7 +75,7 @@ function Showcase() {
     };
   }, [projects]);
 
-  const filtered = projects.filter(p => {
+  const filtered = projects.filter((p) => {
     const q = search.toLowerCase();
     return p.name.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
   });
@@ -103,7 +114,7 @@ function Showcase() {
         <Input
           placeholder="Search completed projects..."
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         {loading ? (
@@ -119,7 +130,7 @@ function Showcase() {
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-4">
-            {filtered.map(p => (
+            {filtered.map((p) => (
               <div key={p.id} className="relative">
                 <ProjectCard project={p} currentUserId={user?.id} />
                 <div className="mt-3">
@@ -150,24 +161,34 @@ function Showcase() {
       {addModalOpen && (
         <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="relative bg-[#1A1A1A] border border-[#2A2A2A] rounded-[16px] p-8 w-full max-w-[480px]">
-            <button onClick={() => setAddModalOpen(false)} aria-label="Close"
-              className="absolute top-4 right-4 w-8 h-8 inline-flex items-center justify-center rounded-full text-[#A1A1A1] hover:text-white hover:bg-[#2A2A2A] transition">×</button>
+            <button
+              onClick={() => setAddModalOpen(false)}
+              aria-label="Close"
+              className="absolute top-4 right-4 w-8 h-8 inline-flex items-center justify-center rounded-full text-[#A1A1A1] hover:text-white hover:bg-[#2A2A2A] transition"
+            >
+              ×
+            </button>
             <h2 className="text-white text-[20px] mb-5">Add to Showcase</h2>
             <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre] mb-4">
               Select a completed project to add to the showcase:
             </p>
             <div className="flex flex-col gap-2 max-h-[400px] overflow-y-auto">
-              {myDoneProjects.map(p => (
+              {myDoneProjects.map((p) => (
                 <button
                   key={p.id}
                   onClick={() => handleAddToShowcase(p.id)}
-                  className="text-left p-4 rounded-[12px] border border-[#2A2A2A] hover:border-[#E2E2E2] transition">
+                  className="text-left p-4 rounded-[12px] border border-[#2A2A2A] hover:border-[#E2E2E2] transition"
+                >
                   <div className="text-white text-[15px] font-[Unbounded] mb-1">{p.name}</div>
-                  <p className="text-[#A1A1A1] text-[13px] font-[Proza_Libre] line-clamp-2">{p.description}</p>
+                  <p className="text-[#A1A1A1] text-[13px] font-[Proza_Libre] line-clamp-2">
+                    {p.description}
+                  </p>
                 </button>
               ))}
             </div>
-            <Button variant="ghost" full className="mt-4" onClick={() => setAddModalOpen(false)}>Cancel</Button>
+            <Button variant="ghost" full className="mt-4" onClick={() => setAddModalOpen(false)}>
+              Cancel
+            </Button>
           </div>
         </div>
       )}

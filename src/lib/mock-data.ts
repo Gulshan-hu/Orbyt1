@@ -51,6 +51,12 @@ export const CURRENT_USER_ID = "";
 export const mockUsers: MockUser[] = [];
 export const mockProjects: MockProject[] = [];
 export const mockRatings: MockRating[] = [];
-export function getUserById(_id: string): MockUser | undefined { return undefined; }
-export function getProjectById(_id: string): MockProject | undefined { return undefined; }
-export function getRatingsForUser(_id: string): MockRating[] { return []; }
+export function getUserById(_id: string): MockUser | undefined {
+  return undefined;
+}
+export function getProjectById(_id: string): MockProject | undefined {
+  return undefined;
+}
+export function getRatingsForUser(_id: string): MockRating[] {
+  return [];
+}

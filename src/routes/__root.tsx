@@ -77,7 +77,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Orbyt — Find the right team. Find the right project." },
-      { name: "description", content: "Orbyt matches university students with each other based on their skills and project needs." },
+      {
+        name: "description",
+        content:
+          "Orbyt matches university students with each other based on their skills and project needs.",
+      },
       { name: "author", content: "Orbyt" },
       { property: "og:title", content: "Orbyt" },
       { property: "og:description", content: "Find the right team. Find the right project." },
@@ -127,7 +131,7 @@ function RootComponent() {
       <ToastProvider>
         <NotificationsProvider>
           <MoonDecoration />
-          <div style={{ position: 'relative', zIndex: 10 }}>
+          <div style={{ position: "relative", zIndex: 10 }}>
             <Outlet />
           </div>
         </NotificationsProvider>

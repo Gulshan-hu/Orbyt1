@@ -5,7 +5,13 @@ import { Textarea } from "./Input";
 import { submitProjectReview } from "@/lib/data";
 import { useToast } from "./Toast";
 
-export function ProjectReviewModal({ open, onClose, projectId, projectName, reviewerId }: {
+export function ProjectReviewModal({
+  open,
+  onClose,
+  projectId,
+  projectName,
+  reviewerId,
+}: {
   open: boolean;
   onClose: () => void;
   projectId: string;
@@ -52,14 +58,18 @@ export function ProjectReviewModal({ open, onClose, projectId, projectName, revi
           rows={6}
           placeholder="What did you think of this project? How was your experience testing it?"
           value={reviewText}
-          onChange={e => setReviewText(e.target.value)}
+          onChange={(e) => setReviewText(e.target.value)}
           maxLength={1000}
         />
-        <p className="text-right text-[11px] text-[#A1A1A1] mt-1 font-[Proza_Libre]">{reviewText.length}/1000</p>
+        <p className="text-right text-[11px] text-[#A1A1A1] mt-1 font-[Proza_Libre]">
+          {reviewText.length}/1000
+        </p>
       </div>
 
       <div className="flex gap-2 mt-6">
-        <Button variant="ghost" full onClick={onClose}>Cancel</Button>
+        <Button variant="ghost" full onClick={onClose}>
+          Cancel
+        </Button>
         <Button full onClick={handleSubmit} disabled={submitting}>
           {submitting ? "Submitting..." : "Submit Review"}
         </Button>

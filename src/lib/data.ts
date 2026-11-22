@@ -22,7 +22,7 @@ export interface OrbytProject {
   name: string;
   description: string;
   projectLink?: string;
-  status: 'looking_for_team' | 'in_progress' | 'done';
+  status: "looking_for_team" | "in_progress" | "done";
   createdAt: string;
   skillsHave: string[];
   skillsNeed: { skill: string; note?: string }[];
@@ -123,7 +123,12 @@ async function loadProjectSkills() {
   return { have, need };
 }
 
-function rowToUser(row: any, skills: string[], projectIds: string[], connectionCount: number): OrbytUser {
+function rowToUser(
+  row: any,
+  skills: string[],
+  projectIds: string[],
+  connectionCount: number,
+): OrbytUser {
   return {
     id: row.id,
     firstName: row.first_name,
@@ -139,16 +144,23 @@ function rowToUser(row: any, skills: string[], projectIds: string[], connectionC
   };
 }
 
-function rowToProject(row: any, have: string[], need: { skill: string; note?: string }[], memberIds: string[]): OrbytProject {
+function rowToProject(
+  row: any,
+  have: string[],
+  need: { skill: string; note?: string }[],
+  memberIds: string[],
+): OrbytProject {
   // Ensure captain is included in memberIds
-  const allMembers = memberIds.includes(row.captain_id) ? memberIds : [row.captain_id, ...memberIds];
+  const allMembers = memberIds.includes(row.captain_id)
+    ? memberIds
+    : [row.captain_id, ...memberIds];
   return {
     id: row.id,
     captainId: row.captain_id,
     name: row.name,
     description: row.description,
     projectLink: row.project_link ?? undefined,
-    status: row.status || 'looking_for_team',
+    status: row.status || "looking_for_team",
     createdAt: relativeTime(row.created_at),
     skillsHave: have,
     skillsNeed: need,
@@ -170,7 +182,9 @@ export async function fetchAllUsers(): Promise<OrbytUser[]> {
     cc.set(c.user_a, (cc.get(c.user_a) ?? 0) + 1);
     cc.set(c.user_b, (cc.get(c.user_b) ?? 0) + 1);
   }
-  return (users ?? []).map(u => rowToUser(u, skills.get(u.id) ?? [], members.byUser.get(u.id) ?? [], cc.get(u.id) ?? 0));
+  return (users ?? []).map((u) =>
+    rowToUser(u, skills.get(u.id) ?? [], members.byUser.get(u.id) ?? [], cc.get(u.id) ?? 0),
+  );
 }
 
 export async function fetchUser(id: string): Promise<OrbytUser | null> {
@@ -183,8 +197,8 @@ export async function fetchUser(id: string): Promise<OrbytUser | null> {
   ]);
   return rowToUser(
     row,
-    (sk ?? []).map(s => s.skill),
-    (pm ?? []).map(p => p.project_id),
+    (sk ?? []).map((s) => s.skill),
+    (pm ?? []).map((p) => p.project_id),
     (conns ?? []).length,
   );
 }
@@ -195,32 +209,58 @@ export async function fetchAllProjects(): Promise<OrbytProject[]> {
     loadProjectMembers(),
     loadProjectSkills(),
   ]);
-  return (rows ?? []).map(r => rowToProject(r, ps.have.get(r.id) ?? [], ps.need.get(r.id) ?? [], members.byProject.get(r.id) ?? []));
+  return (rows ?? []).map((r) =>
+    rowToProject(
+      r,
+      ps.have.get(r.id) ?? [],
+      ps.need.get(r.id) ?? [],
+      members.byProject.get(r.id) ?? [],
+    ),
+  );
 }
 
 export async function fetchProjectsForUser(userId: string): Promise<OrbytProject[]> {
   // Projects where user is captain OR member
-  const { data: pmRows } = await supabase.from("project_members").select("project_id").eq("user_id", userId);
-  const memberProjectIds = (pmRows ?? []).map(r => r.project_id);
+  const { data: pmRows } = await supabase
+    .from("project_members")
+    .select("project_id")
+    .eq("user_id", userId);
+  const memberProjectIds = (pmRows ?? []).map((r) => r.project_id);
   const { data: rows } = await supabase
     .from("projects")
     .select("*")
-    .or(`captain_id.eq.${userId}${memberProjectIds.length ? `,id.in.(${memberProjectIds.join(",")})` : ""}`)
+    .or(
+      `captain_id.eq.${userId}${memberProjectIds.length ? `,id.in.(${memberProjectIds.join(",")})` : ""}`,
+    )
     .order("created_at", { ascending: false });
   if (!rows?.length) return [];
-  const ids = rows.map(r => r.id);
+  const ids = rows.map((r) => r.id);
   const [{ data: have }, { data: need }, { data: members }] = await Promise.all([
     supabase.from("project_skills_have").select("project_id, skill").in("project_id", ids),
     supabase.from("project_skills_need").select("project_id, skill, note").in("project_id", ids),
     supabase.from("project_members").select("project_id, user_id").in("project_id", ids),
   ]);
   const haveMap = new Map<string, string[]>();
-  for (const r of have ?? []) { const a = haveMap.get(r.project_id) ?? []; a.push(r.skill); haveMap.set(r.project_id, a); }
+  for (const r of have ?? []) {
+    const a = haveMap.get(r.project_id) ?? [];
+    a.push(r.skill);
+    haveMap.set(r.project_id, a);
+  }
   const needMap = new Map<string, { skill: string; note?: string }[]>();
-  for (const r of need ?? []) { const a = needMap.get(r.project_id) ?? []; a.push({ skill: r.skill, note: r.note ?? undefined }); needMap.set(r.project_id, a); }
+  for (const r of need ?? []) {
+    const a = needMap.get(r.project_id) ?? [];
+    a.push({ skill: r.skill, note: r.note ?? undefined });
+    needMap.set(r.project_id, a);
+  }
   const memMap = new Map<string, string[]>();
-  for (const r of members ?? []) { const a = memMap.get(r.project_id) ?? []; a.push(r.user_id); memMap.set(r.project_id, a); }
-  return rows.map(r => rowToProject(r, haveMap.get(r.id) ?? [], needMap.get(r.id) ?? [], memMap.get(r.id) ?? []));
+  for (const r of members ?? []) {
+    const a = memMap.get(r.project_id) ?? [];
+    a.push(r.user_id);
+    memMap.set(r.project_id, a);
+  }
+  return rows.map((r) =>
+    rowToProject(r, haveMap.get(r.id) ?? [], needMap.get(r.id) ?? [], memMap.get(r.id) ?? []),
+  );
 }
 
 export async function fetchConnectionsForUser(userId: string): Promise<OrbytUser[]> {
@@ -228,7 +268,7 @@ export async function fetchConnectionsForUser(userId: string): Promise<OrbytUser
     .from("connections")
     .select("user_a, user_b")
     .or(`user_a.eq.${userId},user_b.eq.${userId}`);
-  const otherIds = (conns ?? []).map(c => c.user_a === userId ? c.user_b : c.user_a);
+  const otherIds = (conns ?? []).map((c) => (c.user_a === userId ? c.user_b : c.user_a));
   if (!otherIds.length) return [];
   const { data: users } = await supabase.from("users").select("*").in("id", otherIds);
   const skills = await loadAllSkillsByUser();
@@ -239,7 +279,9 @@ export async function fetchConnectionsForUser(userId: string): Promise<OrbytUser
     cc.set(c.user_a, (cc.get(c.user_a) ?? 0) + 1);
     cc.set(c.user_b, (cc.get(c.user_b) ?? 0) + 1);
   }
-  return (users ?? []).map(u => rowToUser(u, skills.get(u.id) ?? [], members.byUser.get(u.id) ?? [], cc.get(u.id) ?? 0));
+  return (users ?? []).map((u) =>
+    rowToUser(u, skills.get(u.id) ?? [], members.byUser.get(u.id) ?? [], cc.get(u.id) ?? 0),
+  );
 }
 
 export async function fetchPendingRequests(toUserId: string): Promise<OrbytPendingRequest[]> {
@@ -250,15 +292,17 @@ export async function fetchPendingRequests(toUserId: string): Promise<OrbytPendi
     .eq("status", "pending")
     .order("created_at", { ascending: false });
   if (!reqs?.length) return [];
-  const userIds = [...new Set(reqs.map(r => r.from_user_id))];
-  const projectIds = reqs.map(r => r.project_id).filter(Boolean) as string[];
+  const userIds = [...new Set(reqs.map((r) => r.from_user_id))];
+  const projectIds = reqs.map((r) => r.project_id).filter(Boolean) as string[];
   const [{ data: users }, { data: projs }, skills, members] = await Promise.all([
     supabase.from("users").select("*").in("id", userIds),
-    projectIds.length ? supabase.from("projects").select("id, name").in("id", projectIds) : Promise.resolve({ data: [] as any[] }),
+    projectIds.length
+      ? supabase.from("projects").select("id, name").in("id", projectIds)
+      : Promise.resolve({ data: [] as any[] }),
     loadAllSkillsByUser(),
     loadProjectMembers(),
   ]);
-  const userMap = new Map((users ?? []).map(u => [u.id, u]));
+  const userMap = new Map((users ?? []).map((u) => [u.id, u]));
   const projMap = new Map((projs ?? []).map((p: any) => [p.id, p.name]));
   const { data: allConns } = await supabase.from("connections").select("user_a, user_b");
   const cc = new Map<string, number>();
@@ -266,13 +310,18 @@ export async function fetchPendingRequests(toUserId: string): Promise<OrbytPendi
     cc.set(c.user_a, (cc.get(c.user_a) ?? 0) + 1);
     cc.set(c.user_b, (cc.get(c.user_b) ?? 0) + 1);
   }
-  return reqs.map(r => {
+  return reqs.map((r) => {
     const u = userMap.get(r.from_user_id)!;
     return {
       id: r.id,
-      fromUser: rowToUser(u, skills.get(u.id) ?? [], members.byUser.get(u.id) ?? [], cc.get(u.id) ?? 0),
+      fromUser: rowToUser(
+        u,
+        skills.get(u.id) ?? [],
+        members.byUser.get(u.id) ?? [],
+        cc.get(u.id) ?? 0,
+      ),
       projectId: r.project_id,
-      projectName: r.project_id ? projMap.get(r.project_id) ?? null : null,
+      projectName: r.project_id ? (projMap.get(r.project_id) ?? null) : null,
       message: r.message,
       createdAt: relativeTime(r.created_at),
     };
@@ -285,7 +334,7 @@ export async function fetchRatingsForUser(userId: string): Promise<OrbytRating[]
     .select("*")
     .eq("to_user_id", userId)
     .order("created_at", { ascending: false });
-  return (data ?? []).map(r => ({
+  return (data ?? []).map((r) => ({
     id: r.id,
     fromUserId: r.from_user_id,
     toUserId: r.to_user_id,
@@ -322,60 +371,99 @@ export async function createProjectWithSkills(args: {
     .single();
   if (error || !proj) throw error;
   const tasks: Promise<any>[] = [];
-  if (args.have.length) tasks.push(supabase.from("project_skills_have").insert(args.have.map(s => ({ project_id: proj.id, skill: s }))));
-  if (args.need.length) tasks.push(supabase.from("project_skills_need").insert(args.need.map(n => ({ project_id: proj.id, skill: n.skill, note: n.note ?? null }))));
-  tasks.push(supabase.from("project_members").insert({ project_id: proj.id, user_id: args.captainId }));
+  if (args.have.length)
+    tasks.push(
+      supabase
+        .from("project_skills_have")
+        .insert(args.have.map((s) => ({ project_id: proj.id, skill: s }))),
+    );
+  if (args.need.length)
+    tasks.push(
+      supabase
+        .from("project_skills_need")
+        .insert(
+          args.need.map((n) => ({ project_id: proj.id, skill: n.skill, note: n.note ?? null })),
+        ),
+    );
+  tasks.push(
+    supabase.from("project_members").insert({ project_id: proj.id, user_id: args.captainId }),
+  );
   await Promise.all(tasks);
   return proj.id as string;
 }
 
-export async function updateProject(id: string, args: {
-  name: string;
-  description: string;
-  projectLink?: string;
-  have: string[];
-  need: { skill: string; note?: string }[];
-}) {
-  await supabase.from("projects").update({
-    name: args.name,
-    description: args.description,
-    project_link: args.projectLink ?? null,
-  }).eq("id", id);
+export async function updateProject(
+  id: string,
+  args: {
+    name: string;
+    description: string;
+    projectLink?: string;
+    have: string[];
+    need: { skill: string; note?: string }[];
+  },
+) {
+  await supabase
+    .from("projects")
+    .update({
+      name: args.name,
+      description: args.description,
+      project_link: args.projectLink ?? null,
+    })
+    .eq("id", id);
   await supabase.from("project_skills_have").delete().eq("project_id", id);
   await supabase.from("project_skills_need").delete().eq("project_id", id);
-  if (args.have.length) await supabase.from("project_skills_have").insert(args.have.map(s => ({ project_id: id, skill: s })));
-  if (args.need.length) await supabase.from("project_skills_need").insert(args.need.map(n => ({ project_id: id, skill: n.skill, note: n.note ?? null })));
+  if (args.have.length)
+    await supabase
+      .from("project_skills_have")
+      .insert(args.have.map((s) => ({ project_id: id, skill: s })));
+  if (args.need.length)
+    await supabase
+      .from("project_skills_need")
+      .insert(args.need.map((n) => ({ project_id: id, skill: n.skill, note: n.note ?? null })));
 }
 
 export async function deleteProject(id: string) {
   await supabase.from("projects").delete().eq("id", id);
 }
 
-export async function updateUserProfile(id: string, args: {
-  first_name: string;
-  last_name: string;
-  university: string;
-  major: string;
-  skills: string[];
-  avatar_url?: string | null;
-}) {
-  await supabase.from("users").update({
-    first_name: args.first_name,
-    last_name: args.last_name,
-    university: args.university,
-    major: args.major,
-    avatar_url: args.avatar_url,
-  }).eq("id", id);
+export async function updateUserProfile(
+  id: string,
+  args: {
+    first_name: string;
+    last_name: string;
+    university: string;
+    major: string;
+    skills: string[];
+    avatar_url?: string | null;
+  },
+) {
+  await supabase
+    .from("users")
+    .update({
+      first_name: args.first_name,
+      last_name: args.last_name,
+      university: args.university,
+      major: args.major,
+      avatar_url: args.avatar_url,
+    })
+    .eq("id", id);
   await supabase.from("user_skills").delete().eq("user_id", id);
-  if (args.skills.length) await supabase.from("user_skills").insert(args.skills.map(s => ({ user_id: id, skill: s })));
+  if (args.skills.length)
+    await supabase.from("user_skills").insert(args.skills.map((s) => ({ user_id: id, skill: s })));
 }
 
 export async function setUserSkills(userId: string, skills: string[]) {
   await supabase.from("user_skills").delete().eq("user_id", userId);
-  if (skills.length) await supabase.from("user_skills").insert(skills.map(s => ({ user_id: userId, skill: s })));
+  if (skills.length)
+    await supabase.from("user_skills").insert(skills.map((s) => ({ user_id: userId, skill: s })));
 }
 
-export async function sendConnectionRequest(args: { fromUserId: string; toUserId: string; projectId?: string | null; message?: string }) {
+export async function sendConnectionRequest(args: {
+  fromUserId: string;
+  toUserId: string;
+  projectId?: string | null;
+  message?: string;
+}) {
   const { error } = await supabase.from("connection_requests").insert({
     from_user_id: args.fromUserId,
     to_user_id: args.toUserId,
@@ -385,7 +473,12 @@ export async function sendConnectionRequest(args: { fromUserId: string; toUserId
   if (error) throw error;
 }
 
-export async function acceptConnectionRequest(reqId: string, fromUserId: string, toUserId: string, projectId: string | null) {
+export async function acceptConnectionRequest(
+  reqId: string,
+  fromUserId: string,
+  toUserId: string,
+  projectId: string | null,
+) {
   await supabase.from("connection_requests").update({ status: "accepted" }).eq("id", reqId);
   const [a, b] = [fromUserId, toUserId].sort();
   await supabase.from("connections").insert({ user_a: a, user_b: b, project_id: projectId });
@@ -403,7 +496,7 @@ export async function fetchFriendsForUser(userId: string): Promise<OrbytUser[]> 
 
   if (!friendRows || friendRows.length === 0) return [];
 
-  const friendIds = friendRows.map(f => f.user_a === userId ? f.user_b : f.user_a);
+  const friendIds = friendRows.map((f) => (f.user_a === userId ? f.user_b : f.user_a));
 
   const [{ data: users }, { data: skills }] = await Promise.all([
     supabase.from("users").select("*").in("id", friendIds),
@@ -456,12 +549,19 @@ export async function submitRating(args: {
   if (error) throw error;
 }
 
-export async function updateProjectStatus(projectId: string, status: 'looking_for_team' | 'in_progress' | 'done') {
+export async function updateProjectStatus(
+  projectId: string,
+  status: "looking_for_team" | "in_progress" | "done",
+) {
   const { error } = await supabase.from("projects").update({ status }).eq("id", projectId);
   if (error) throw error;
 }
 
-export async function submitProjectReview(projectId: string, reviewerId: string, reviewText: string) {
+export async function submitProjectReview(
+  projectId: string,
+  reviewerId: string,
+  reviewText: string,
+) {
   const { error } = await supabase.from("project_reviews").insert({
     project_id: projectId,
     reviewer_id: reviewerId,
@@ -512,15 +612,30 @@ export async function fetchProjectReviews(projectId: string): Promise<OrbytProje
 
 export async function fetchCompletedProjects(): Promise<OrbytProject[]> {
   const [{ data: rows }, members, ps] = await Promise.all([
-    supabase.from("projects").select("*").eq("status", "done").eq("in_showcase", true).order("created_at", { ascending: false }),
+    supabase
+      .from("projects")
+      .select("*")
+      .eq("status", "done")
+      .eq("in_showcase", true)
+      .order("created_at", { ascending: false }),
     loadProjectMembers(),
     loadProjectSkills(),
   ]);
-  return (rows ?? []).map(r => rowToProject(r, ps.have.get(r.id) ?? [], ps.need.get(r.id) ?? [], members.byProject.get(r.id) ?? []));
+  return (rows ?? []).map((r) =>
+    rowToProject(
+      r,
+      ps.have.get(r.id) ?? [],
+      ps.need.get(r.id) ?? [],
+      members.byProject.get(r.id) ?? [],
+    ),
+  );
 }
 
 export async function addProjectToShowcase(projectId: string) {
-  const { error } = await supabase.from("projects").update({ in_showcase: true }).eq("id", projectId);
+  const { error } = await supabase
+    .from("projects")
+    .update({ in_showcase: true })
+    .eq("id", projectId);
   if (error) throw error;
 }
 
@@ -531,15 +646,16 @@ export function projectMatchScore(myskills: string[], project: OrbytProject): nu
   const mine = new Set(myskills);
 
   // Calculate how many of the project's needed skills you have
-  const matchedNeeds = project.skillsNeed.filter(n => mine.has(n.skill)).length;
+  const matchedNeeds = project.skillsNeed.filter((n) => mine.has(n.skill)).length;
 
   // Higher score if you match more of what they need
   const needScore = (matchedNeeds / project.skillsNeed.length) * 100;
 
   // Bonus: if you have skills they already have (can contribute more)
   const haveSet = new Set(project.skillsHave);
-  const matchedHave = myskills.filter(s => haveSet.has(s)).length;
-  const haveBonus = project.skillsHave.length > 0 ? (matchedHave / project.skillsHave.length) * 20 : 0;
+  const matchedHave = myskills.filter((s) => haveSet.has(s)).length;
+  const haveBonus =
+    project.skillsHave.length > 0 ? (matchedHave / project.skillsHave.length) * 20 : 0;
 
   // Weighted score: 80% based on needed skills, 20% bonus for matching existing skills
   return Math.min(100, Math.round(needScore * 0.8 + haveBonus));
@@ -552,10 +668,10 @@ export function userMatchScore(myskills: string[], otherSkills: string[]): numbe
   const theirs = new Set(otherSkills);
 
   // Skills they have that you don't (complementary - they can teach you)
-  const complementary = otherSkills.filter(s => !mine.has(s)).length;
+  const complementary = otherSkills.filter((s) => !mine.has(s)).length;
 
   // Skills you both have (common ground - easier collaboration)
-  const overlap = otherSkills.filter(s => mine.has(s)).length;
+  const overlap = otherSkills.filter((s) => mine.has(s)).length;
 
   // Balanced score: 60% complementary (diversity), 40% overlap (common ground)
   const complementaryScore = (complementary / otherSkills.length) * 60;

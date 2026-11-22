@@ -5,7 +5,12 @@ import { useAuth } from "./auth";
 export interface Notification {
   id: string;
   userId: string;
-  type: 'connect_request_received' | 'connect_request_accepted' | 'friend_new_project' | 'project_invite' | 'project_status_change';
+  type:
+    | "connect_request_received"
+    | "connect_request_accepted"
+    | "friend_new_project"
+    | "project_invite"
+    | "project_status_change";
   title: string;
   message: string;
   link?: string;
@@ -34,24 +39,26 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     if (!user) return;
 
     const { data, error } = await supabase
-      .from('notifications')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
       .limit(50);
 
     if (!error && data) {
-      setNotifications(data.map(n => ({
-        id: n.id,
-        userId: n.user_id,
-        type: n.type,
-        title: n.title,
-        message: n.message,
-        link: n.link,
-        read: n.read,
-        createdAt: n.created_at,
-        metadata: n.metadata,
-      })));
+      setNotifications(
+        data.map((n) => ({
+          id: n.id,
+          userId: n.user_id,
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          link: n.link,
+          read: n.read,
+          createdAt: n.created_at,
+          metadata: n.metadata,
+        })),
+      );
     }
     setLoading(false);
   };
@@ -68,14 +75,18 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     // Set up real-time subscription
     const channel = supabase
       .channel(`notifications-${user.id}`)
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'notifications',
-        filter: `user_id=eq.${user.id}`,
-      }, () => {
-        fetchNotifications();
-      })
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => {
+          fetchNotifications();
+        },
+      )
       .subscribe();
 
     return () => {
@@ -84,37 +95,36 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const markAsRead = async (id: string) => {
-    await supabase
-      .from('notifications')
-      .update({ read: true })
-      .eq('id', id);
+    await supabase.from("notifications").update({ read: true }).eq("id", id);
 
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const markAllAsRead = async () => {
     if (!user) return;
 
     await supabase
-      .from('notifications')
+      .from("notifications")
       .update({ read: true })
-      .eq('user_id', user.id)
-      .eq('read', false);
+      .eq("user_id", user.id)
+      .eq("read", false);
 
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   return (
-    <NotificationsContext.Provider value={{
-      notifications,
-      unreadCount,
-      loading,
-      markAsRead,
-      markAllAsRead,
-      refreshNotifications: fetchNotifications,
-    }}>
+    <NotificationsContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        loading,
+        markAsRead,
+        markAllAsRead,
+        refreshNotifications: fetchNotifications,
+      }}
+    >
       {children}
     </NotificationsContext.Provider>
   );
@@ -123,7 +133,7 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
 export function useNotifications() {
   const context = useContext(NotificationsContext);
   if (!context) {
-    throw new Error('useNotifications must be used within NotificationsProvider');
+    throw new Error("useNotifications must be used within NotificationsProvider");
   }
   return context;
 }

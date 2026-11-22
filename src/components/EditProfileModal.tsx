@@ -10,7 +10,17 @@ import { requestEmailChange, verifyEmailChangeOtp } from "@/lib/auth";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "./Toast";
 
-export function EditProfileModal({ open, onClose, user, onSaved }: { open: boolean; onClose: () => void; user: OrbytUser; onSaved: () => void }) {
+export function EditProfileModal({
+  open,
+  onClose,
+  user,
+  onSaved,
+}: {
+  open: boolean;
+  onClose: () => void;
+  user: OrbytUser;
+  onSaved: () => void;
+}) {
   const isPredefined = (u: string) => UNIVERSITIES.includes(u);
   const initialUni = isPredefined(user.university) ? user.university : "Digər";
   const initialUniOther = isPredefined(user.university) ? "" : user.university;
@@ -34,11 +44,12 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
 
   useEffect(() => {
     if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown(c => c - 1), 1000);
+    const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
 
-  const toggle = (s: string) => setSkills(p => p.includes(s) ? p.filter(x => x !== s) : [...p, s]);
+  const toggle = (s: string) =>
+    setSkills((p) => (p.includes(s) ? p.filter((x) => x !== s) : [...p, s]));
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -63,19 +74,19 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
 
     // Upload avatar if changed
     if (avatarFile) {
-      const fileExt = avatarFile.name.split('.').pop();
+      const fileExt = avatarFile.name.split(".").pop();
       const fileName = `${user.id}/avatar-${Date.now()}.${fileExt}`;
 
       // Delete old avatar if exists
       if (user.avatarUrl) {
-        const oldPath = user.avatarUrl.split('/avatars/')[1];
+        const oldPath = user.avatarUrl.split("/avatars/")[1];
         if (oldPath) {
-          await supabase.storage.from('avatars').remove([oldPath]);
+          await supabase.storage.from("avatars").remove([oldPath]);
         }
       }
 
       const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('avatars')
+        .from("avatars")
         .upload(fileName, avatarFile, { upsert: true });
 
       if (uploadError) {
@@ -83,9 +94,9 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
         return;
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
 
       avatarUrl = publicUrl;
     }
@@ -128,7 +139,10 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
   const save = () => {
     const emailChanged = email.trim().toLowerCase() !== user.email.toLowerCase();
     if (emailChanged) {
-      if (!/\S+@\S+/.test(email)) { show("Enter a valid email"); return; }
+      if (!/\S+@\S+/.test(email)) {
+        show("Enter a valid email");
+        return;
+      }
       sendCode();
       setOtp("");
       setOtpError("");
@@ -149,11 +163,18 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
   };
 
   const cancel = () => {
-    setFirstName(user.firstName); setLastName(user.lastName); setEmail(user.email);
-    setUniversity(initialUni); setUniversityOther(initialUniOther);
-    setMajor(user.major); setSkills(user.skills);
-    setAvatarFile(null); setAvatarPreview(user.avatarUrl || null);
-    setVerifying(false); setOtp(""); setOtpError("");
+    setFirstName(user.firstName);
+    setLastName(user.lastName);
+    setEmail(user.email);
+    setUniversity(initialUni);
+    setUniversityOther(initialUniOther);
+    setMajor(user.major);
+    setSkills(user.skills);
+    setAvatarFile(null);
+    setAvatarPreview(user.avatarUrl || null);
+    setVerifying(false);
+    setOtp("");
+    setOtpError("");
     onClose();
   };
 
@@ -170,7 +191,10 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-white text-2xl">{firstName.charAt(0)}{lastName.charAt(0)}</span>
+                    <span className="text-white text-2xl">
+                      {firstName.charAt(0)}
+                      {lastName.charAt(0)}
+                    </span>
                   )}
                 </div>
                 <div>
@@ -191,32 +215,63 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
-              <div><FieldLabel>First name</FieldLabel><Input value={firstName} onChange={e => setFirstName(e.target.value)} /></div>
-              <div><FieldLabel>Last name</FieldLabel><Input value={lastName} onChange={e => setLastName(e.target.value)} /></div>
+              <div>
+                <FieldLabel>First name</FieldLabel>
+                <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+              </div>
+              <div>
+                <FieldLabel>Last name</FieldLabel>
+                <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
+              </div>
             </div>
             <div>
               <FieldLabel>Gmail</FieldLabel>
-              <Input type="email" value={email} onChange={e => setEmail(e.target.value)} />
-              <p className="text-[12px] text-[#A1A1A1] mt-1.5 font-[Proza_Libre]">Changing this will require email verification</p>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+              <p className="text-[12px] text-[#A1A1A1] mt-1.5 font-[Proza_Libre]">
+                Changing this will require email verification
+              </p>
             </div>
-            <div><FieldLabel>University</FieldLabel>
-              <Select value={university} onChange={e => setUniversity(e.target.value)}>
-                {UNIVERSITIES.map(u => <option key={u} value={u}>{u}</option>)}
+            <div>
+              <FieldLabel>University</FieldLabel>
+              <Select value={university} onChange={(e) => setUniversity(e.target.value)}>
+                {UNIVERSITIES.map((u) => (
+                  <option key={u} value={u}>
+                    {u}
+                  </option>
+                ))}
               </Select>
               {university === "Digər" && (
-                <div className="mt-3"><Input placeholder="Enter your university name" value={universityOther} onChange={e => setUniversityOther(e.target.value)} /></div>
+                <div className="mt-3">
+                  <Input
+                    placeholder="Enter your university name"
+                    value={universityOther}
+                    onChange={(e) => setUniversityOther(e.target.value)}
+                  />
+                </div>
               )}
             </div>
-            <div><FieldLabel>Major</FieldLabel>
-              <Select value={major} onChange={e => setMajor(e.target.value)}>
-                {MAJORS.map(m => <option key={m} value={m}>{m}</option>)}
+            <div>
+              <FieldLabel>Major</FieldLabel>
+              <Select value={major} onChange={(e) => setMajor(e.target.value)}>
+                {MAJORS.map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
               </Select>
             </div>
-            <div><FieldLabel>Skills</FieldLabel><SkillPicker selected={skills} onToggle={toggle} /></div>
+            <div>
+              <FieldLabel>Skills</FieldLabel>
+              <SkillPicker selected={skills} onToggle={toggle} />
+            </div>
           </div>
           <div className="flex gap-2 mt-6">
-            <Button variant="ghost" full onClick={cancel}>Cancel</Button>
-            <Button full onClick={save}>Save Changes</Button>
+            <Button variant="ghost" full onClick={cancel}>
+              Cancel
+            </Button>
+            <Button full onClick={save}>
+              Save Changes
+            </Button>
           </div>
         </>
       ) : (
@@ -225,16 +280,43 @@ export function EditProfileModal({ open, onClose, user, onSaved }: { open: boole
           <p className="text-[#A1A1A1] text-[14px] font-[Proza_Libre] mb-6">
             We sent an 8-digit code to <span className="text-white">{email}</span>
           </p>
-          <OtpInput value={otp} onChange={v => { setOtp(v); setOtpError(""); }} length={8} />
-          {otpError && <p className="text-[#FF6B6B] text-[13px] font-[Proza_Libre] mt-3">{otpError}</p>}
+          <OtpInput
+            value={otp}
+            onChange={(v) => {
+              setOtp(v);
+              setOtpError("");
+            }}
+            length={8}
+          />
+          {otpError && (
+            <p className="text-[#FF6B6B] text-[13px] font-[Proza_Libre] mt-3">{otpError}</p>
+          )}
           <div className="mt-4">
-            <Button variant="ghost" disabled={cooldown > 0} onClick={() => { sendCode(); setOtp(""); }}>
+            <Button
+              variant="ghost"
+              disabled={cooldown > 0}
+              onClick={() => {
+                sendCode();
+                setOtp("");
+              }}
+            >
               {cooldown > 0 ? `Resend in ${cooldown}s` : "Resend code"}
             </Button>
           </div>
           <div className="mt-6 flex items-center justify-between gap-3">
-            <Button variant="ghost" onClick={() => { setVerifying(false); setOtp(""); setOtpError(""); }}>Back</Button>
-            <Button disabled={otp.length !== 8} onClick={verifyAndSave}>Verify & Save</Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setVerifying(false);
+                setOtp("");
+                setOtpError("");
+              }}
+            >
+              Back
+            </Button>
+            <Button disabled={otp.length !== 8} onClick={verifyAndSave}>
+              Verify & Save
+            </Button>
           </div>
         </div>
       )}
